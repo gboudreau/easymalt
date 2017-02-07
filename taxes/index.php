@@ -102,7 +102,7 @@ $transactions = DB::getAll($q, $params);
             </tr>
         <?php endif; ?>
         <tr>
-            <td><a href="/txn/?id=<?php phe($txn->id) ?>"><?php phe($txn->id) ?></a></td>
+            <td><a href="/txn/?id=<?php echo $txn->id ?>" onclick="return editTxn(this)"><?php phe($txn->id) ?></a></td>
             <td><?php phe(substr($txn->date, 0, 10)) ?></td>
             <td><?php phe($txn->name) ?></td>
             <td><?php phe($txn->memo) ?></td>
@@ -111,5 +111,32 @@ $transactions = DB::getAll($q, $params);
         </tr>
     <?php endforeach; ?>
 </table>
-
-<?php $_SESSION['previous_page'] = $_SERVER['REQUEST_URI'] ?>
+<script
+        src="https://code.jquery.com/jquery-3.1.1.min.js"
+        integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
+        crossorigin="anonymous"></script>
+<script>
+    var scrollPosition = 0;
+    $(function() {
+        scrollPosition = $(document).scrollTop();
+        $(window).scroll(function() {
+            scrollPosition = $(document).scrollTop();
+            history.replaceState(null, '', '/taxes/?year=<?php echo $year ?>&scrollPos='+scrollPosition);
+        });
+        <?php if (!empty($_GET['scrollPos'])) : ?>
+        $('html, body').animate({
+            scrollTop: <?php echo $_GET['scrollPos'] ?>
+        }, 300);
+        <?php endif; ?>
+    });
+    function editTxn(el) {
+        var uri = $(el).attr('href') + '&scrollPos=' + scrollPosition;
+        window.location.href = uri;
+        return false;
+    }
+</script>
+</body>
+</html>
+<?php
+$_SESSION['previous_page'] = preg_replace('/&scrollPos=\d+/', '', $_SERVER['REQUEST_URI']);
+?>

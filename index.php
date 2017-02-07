@@ -306,4 +306,6 @@ if (empty($_GET['cat'])) {
 
 </body>
 </html>
-<?php $_SESSION['previous_page'] = $_SERVER['REQUEST_URI'] ?>
+<?php
+$_SESSION['previous_page'] = preg_replace('/&scrollPos=\d+/', '', $_SERVER['REQUEST_URI']);
+?>
