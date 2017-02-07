@@ -11,7 +11,7 @@ The imported transactions & accounts data can then be sent to your web server, t
 
 But that is not all... Pie charts!!1
 
-![PieChart](https://d17oy1vhnax1f7.cloudfront.net/items/1R0S2G0i3Z2y1h432z05/easymalt-pie.png?v=66d878c3)
+![PieChart](https://d17oy1vhnax1f7.cloudfront.net/items/3b0G0o1p053U0C1g3E03/Image%202017-02-07%20at%2009.49.54.png?v=91ea6932)
 
 Requirements
 ------------
