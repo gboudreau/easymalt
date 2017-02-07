@@ -1,0 +1,69 @@
+table tr td, table tr th {
+    padding: 6px 14px;
+    text-align: center;
+}
+
+.txn_form table tr td {
+    text-align: left;
+}
+
+table tr.even {
+    background-color: #ddd;
+}
+
+table tr.expenses, table tr.expenses a {
+    color: darkred;
+}
+table tr.expenses td {
+    border-bottom: 1px solid darkred;
+}
+table tr.expenses.even {
+    background-color: #fee0e0;
+}
+table tr.expenses.odd {
+    background-color: #fef0f0;
+}
+table tr.income, table tr.income a {
+    color: green;
+}
+table tr.income td {
+    border-bottom: 1px solid green;
+}
+table tr.income.even {
+    background-color: #e0fee0;
+}
+table tr.income.odd {
+    background-color: #f0fef0;
+}
+
+table tr.uncategorized {
+    font-style: italic;
+    font-weight: bold;
+}
+
+table tr.hidden, table tr.hidden a {
+    color: lightgrey;
+    background-color: white !important;
+}
+table tr.hidden td {
+    border-bottom: 1px solid lightgrey;
+}
+
+table.with_pie_chart {
+    float: left;
+}
+
+div.pie_chart {
+    float: left;
+    height: 400px;
+    width: 70%;
+}
+
+@media only screen and (max-device-width: 480px) and (-webkit-min-device-pixel-ratio: 3) {
+    div.pie_chart {
+        width: 100%;
+    }
+    table {
+        width: 100%;
+    }
+}
