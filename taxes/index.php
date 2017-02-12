@@ -57,6 +57,13 @@ $q = "SELECT *
        ORDER BY category, `date`";
 $transactions = DB::getAll($q, $params);
 ?>
+<html>
+<head>
+    <title>EasyMalt - Taxes Report</title>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=yes, width=device-width">
+    <link rel="stylesheet" type="text/css" href="../css/styles.css">
+</head>
+<body>
 
 &lt; <a href="/">Back</a>
 
