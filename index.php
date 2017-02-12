@@ -91,7 +91,7 @@ function printTransactionsTable($data, $what) {
                     <small><?php echo nl2br(he($row->memo)) ?></small>
                 </td>
                 <td>
-                    <?php if (!empty($_GET['cat'])) : ?>
+                    <?php if (!empty($_GET['cat']) && $row->category == $_GET['cat']) : ?>
                         <?php phe($row->category) ?>
                     <?php else: ?>
                         <a href="?cat=<?php echo urlencode($row->category) ?>&month=<?php echo urlencode($month) ?>"><?php phe($row->category) ?></a>
