@@ -84,6 +84,8 @@ $tags = DB::getAllValues($q);
 
 $q = "SELECT DISTINCT category FROM transactions ORDER BY category";
 $cats = DB::getAllValues($q);
+
+$goto_link = $_SESSION['previous_page'] . (string_contains($_SESSION['previous_page'], '?') ? '&' : '?') .'scrollPos=' . $_GET['scrollPos'];
 ?>
 <html>
 <head>
@@ -94,12 +96,12 @@ $cats = DB::getAllValues($q);
 <body>
 
 <div style="text-align: center">
-    &lt; <a href="<?php phe($_SESSION['previous_page'] . '&scrollPos=' . $_GET['scrollPos']) ?>">Back</a>
+    &lt; <a href="<?php phe($goto_link) ?>">Back</a>
 </div>
 
 <form class="txn_form" method="post" action="">
     <input type="hidden" name="id" value="<?php phe($txn->id) ?>" />
-    <input type="hidden" name="goto" value="<?php phe($_SESSION['previous_page'] . '&scrollPos=' . $_GET['scrollPos']) ?>" />
+    <input type="hidden" name="goto" value="<?php phe($goto_link) ?>" />
     <table>
         <tr>
             <td>
