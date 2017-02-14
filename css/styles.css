@@ -67,3 +67,20 @@ div.pie_chart {
         width: 100%;
     }
 }
+
+.apply_to_all {
+    display: none;
+    color: lightgrey;
+    background-color: #f5f5f5;
+    padding: 8px 8px 1px;
+}
+.apply_to_all input {
+    color: lightgrey;
+}
+.apply_to_all.selected, .apply_to_all.selected input {
+    color: black;
+}
+.apply_to_all input[type=text] {
+    width: 230px;
+    margin: 5px 0;
+}
