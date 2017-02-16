@@ -37,11 +37,42 @@ if (isset($_POST['id'])) {
         $updates[] = 'category = :category';
         $params['category'] = empty($_POST['category']) ? NULL : $_POST['category'];
     }
+    if (!empty($_POST['amounts'])) {
+        $updates[] = 'amount = :amount';
+        $params['amount'] = (float) $_POST['amounts'][0];
+    }
     $updates[] = 'tags = :tags';
     $params['tags'] = empty($_POST['tags']) ? NULL : implode(',', $_POST['tags']);
 
     $q = "UPDATE transactions SET " . implode(', ', $updates) . " WHERE id = :id";
     DB::execute($q, $params);
+
+    if (!empty($_POST['amounts'])) {
+        $q = "SELECT unique_id FROM transactions WHERE id = :id";
+        $txn_unique_id = DB::getFirstValue($q, $_POST['id']);
+
+        $next_available_unique_id = 2;
+        while (TRUE) {
+            $q = "SELECT 1 FROM transactions WHERE unique_id = :unique_id";
+            $txn_found = DB::getFirstValue($q, $txn_unique_id . "-" . $next_available_unique_id);
+            if (!$txn_found) {
+                break;
+            }
+            $next_available_unique_id++;
+        }
+
+        for ($i = 1; $i<count($_POST['amounts']); $i++) {
+            $amount = (float) $_POST['amounts'][$i];
+            $q = "INSERT INTO transactions (account_id, unique_id, `date`, type, amount, display_name, name, memo, tags, category, post_processed) SELECT account_id, CONCAT(unique_id, '-', :unique_id), `date`, type, :amount, display_name, name, memo, tags, category, post_processed FROM transactions WHERE id = :id";
+            $params = [
+                'id' => (int) $_POST['id'],
+                'unique_id' => $next_available_unique_id,
+                'amount' => $amount,
+            ];
+            DB::insert($q, $params);
+            $next_available_unique_id++;
+        }
+    }
 
     if ($_POST['post_processing_rule'] == 'true') {
         $matches_name = $_POST['post_processing_rule_matching'];
@@ -106,6 +137,14 @@ $goto_link = $_SESSION['previous_page'] . (string_contains($_SESSION['previous_p
         <tr>
             <td>
                 ID: <?php phe($txn->id) ?>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                Amount: <?php echo_amount($txn->amount, $txn->currency) ?> [<a href="#split" onclick="splitTxn(this)">split</a>]
+                <input type="hidden" id="amount" value="<?php phe($txn->amount) ?>" />
+                <div class="split_amount">
+                </div>
             </td>
         </tr>
         <tr>
@@ -250,6 +289,71 @@ $goto_link = $_SESSION['previous_page'] . (string_contains($_SESSION['previous_p
             $('.apply_to_all').addClass('selected');
         } else {
             $('.apply_to_all').removeClass('selected');
+        }
+    }
+
+    var $split_amount_div;
+    $(function() {
+        $split_amount_div = $('.split_amount');
+    });
+
+    function splitTxn() {
+        if ($split_amount_div.hasClass('visible')) {
+            // Cancel
+            $('a[href="#split"]').text('split');
+            $split_amount_div.hide();
+            $split_amount_div.removeClass('visible');
+            $split_amount_div.html('');
+        } else {
+            $('a[href="#split"]').text('cancel');
+            $split_amount_div.show();
+            $split_amount_div.addClass('visible');
+            $split_amount_div.append('<input data-idx="0" type="text" name="amounts[]" value="' + $('#amount').val() + '" /> ');
+            $split_amount_div.append('<input data-idx="1" type="text" name="amounts[]" value="0.00" /> ');
+            $split_amount_div.append('[<a href="#add" onclick="addSplitField()">+</a>]');
+            $split_amount_div.find('input[type=text]').on('input', splitTxnAmounts);
+        }
+
+        return false;
+    }
+
+    function addSplitField() {
+        var next_available_number = 2;
+        while ($('.split_amount input[data-idx=' + next_available_number + ']').length) {
+            next_available_number++;
+        }
+        $('.split_amount input[data-idx=' + (next_available_number-1) + ']').after('<input data-idx="' + next_available_number + '" type="text" name="amounts[]" value="0.00" /> ');
+        $split_amount_div.find('input[type=text]').on('input', splitTxnAmounts);
+    }
+
+    function splitTxnAmounts(ev) {
+        var input_el = ev.target;
+        var total_amount = $('#amount').val();
+        var amount = $(input_el).val();
+        
+        var el_index = $(input_el).data('idx');
+
+        var has_more_fields = $(input_el).parent().find('input[data-idx=' + (el_index + 1) + ']').length;
+        if (has_more_fields) {
+            // Is not the last field; adjust next field
+            var next_amount = total_amount - amount;
+            var prev_index = el_index - 1;
+            while ($(input_el).parent().find('input[data-idx=' + prev_index + ']').length) {
+                next_amount -= $(input_el).parent().find('input[data-idx=' + prev_index + ']').val();
+                prev_index--;
+            }
+            $(input_el).parent().find('input[data-idx=' + (el_index + 1) + ']').val(next_amount.toFixed(2));
+        } else {
+            // Is last field; adjust preceding field
+            var prev_amount = total_amount - amount;
+
+            var prev_index = el_index - 2;
+            while ($(input_el).parent().find('input[data-idx=' + prev_index + ']').length) {
+                prev_amount -= $(input_el).parent().find('input[data-idx=' + prev_index + ']').val();
+                prev_index--;
+            }
+
+            $(input_el).parent().find('input[data-idx=' + (el_index - 1) + ']').val(prev_amount.toFixed(2));
         }
     }
 </script>

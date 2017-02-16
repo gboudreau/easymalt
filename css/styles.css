@@ -84,3 +84,11 @@ div.pie_chart {
     width: 230px;
     margin: 5px 0;
 }
+
+.split_amount {
+    display: none;
+}
+.split_amount input[type=text] {
+    width: 70px;
+    text-align: center;
+}
