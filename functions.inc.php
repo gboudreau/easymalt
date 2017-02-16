@@ -84,3 +84,20 @@ function echo_if($condition, $if_true, $if_false = NULL) {
         echo $if_false;
     }
 }
+
+function is_default_currency($currency) {
+    $default_currency = \EasyMalt\Config::get('DEFAULT_CURRENCY');
+    $default_currency_name = array_keys($default_currency)[0];
+    return ( $currency == $default_currency_name );
+}
+
+function echo_amount($amount, $currency = NULL) {
+    $default_currency = \EasyMalt\Config::get('DEFAULT_CURRENCY');
+    $default_currency_name = array_keys($default_currency)[0];
+    $default_currency_symbol = array_pop($default_currency);
+    if (empty($currency)) {
+        $currency = $default_currency_name;
+    }
+    echo_if($currency == $default_currency_name, $default_currency_symbol, $currency);
+    echo '&nbsp;' . number_format($amount, 2);
+}

@@ -10,10 +10,6 @@ if (!empty($_GET['month'])) {
 $previous_month = date('Y-m', strtotime("$month-01 previous month"));
 $next_month = date('Y-m', strtotime("$month-01 next month"));
 
-$default_currency = Config::get('DEFAULT_CURRENCY');
-$default_currency_name = array_keys($default_currency)[0];
-$default_currency_symbol = array_pop($default_currency);
-
 define('NO_CATEGORY_NAME', 'Uncategorized');
 
 define('OPT_NO_CAT', 1);
@@ -64,7 +60,7 @@ function getPageUrlForMonth($month, $options = 0) {
 
 <?php
 function printTransactionsTable($data, $what) {
-    global $month, $default_currency_name, $default_currency_symbol;
+    global $month;
     $total = [];
     $even = FALSE;
     ?>
@@ -99,7 +95,7 @@ function printTransactionsTable($data, $what) {
                     <br/><small><?php echo nl2br(he($row->tags)) ?></small>
                 </td>
                 <td style="text-align: right">
-                    <?php echo (($row->currency == $default_currency_name) ? $default_currency_symbol : $row->currency) .'&nbsp;' . number_format($row->amount, 2) ?>
+                    <?php echo_amount($row->amount, $row->currency) ?>
                 </td>
                 <td style="max-width: 200px">
                     <?php phe($row->account) ?>
@@ -114,11 +110,13 @@ function printTransactionsTable($data, $what) {
             <th style="text-align: right">
                 <?php
                 foreach ($total as $currency => $tot) {
-                    if ($tot == 0 && $currency != $default_currency_name) {
+                    if ($tot == 0 && !is_default_currency($currency)) {
                         continue;
                     }
-                    echo ($currency == $default_currency_name ? $default_currency_symbol : "+&nbsp;$currency") . '&nbsp;';
-                    echo number_format($tot, 2);
+                    if (!is_default_currency($currency)) {
+                        echo "+&nbsp;";
+                    };
+                    echo_amount($tot, $currency);
                     echo '<br/>';
                 }
                 ?>
@@ -196,8 +194,7 @@ $sections = [
                 <tr class="<?php echo $what . " " . (($even=!@$even) ? 'even' : 'odd') . ($row->category == NO_CATEGORY_NAME ? ' uncategorized' : '') ?>">
                     <td><a href="?cat=<?php echo urlencode($row->category) ?>&month=<?php echo urlencode($month) ?>"><?php phe($row->category) ?></a></td>
                     <td style="text-align: right">
-                        <?php if ($row->currency == $default_currency_name) echo $default_currency_symbol; else echo $row->currency; ?>
-                        <?php echo number_format($row->amount, 2) ?>
+                        <?php echo_amount($row->amount, $row->currency) ?>
                     </td>
                 </tr>
             <?php endforeach; ?>
@@ -206,11 +203,13 @@ $sections = [
                 <th style="text-align: right">
                     <?php
                     foreach ($total as $currency => $tot) {
-                        if ($tot == 0 && $currency != $default_currency_name) {
+                        if ($tot == 0 && !is_default_currency($currency)) {
                             continue;
                         }
-                        echo ($currency == $default_currency_name ? $default_currency_symbol : "+&nbsp;$currency") . '&nbsp;';
-                        echo number_format($tot, 2);
+                        if (!is_default_currency($currency)) {
+                            echo "+&nbsp;";
+                        }
+                        echo_amount($tot, $currency);
                         echo '<br/>';
                     }
                     ?>

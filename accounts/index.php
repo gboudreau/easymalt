@@ -29,8 +29,7 @@ $data = DB::getAll($q);
                 <?php phe($row->name) ?>
             </td>
             <td style="text-align: right">
-                <?php echo_if($row->currency == 'CAD', '$', $row->currency); ?>
-                <?php echo number_format($row->balance, 2) ?>
+                <?php echo_amount($row->balance, $row->currency) ?>
             </td>
             <td>
                 <?php echo (empty($row->last_updated) ? 'N/A' : he($row->last_updated)) ?>
