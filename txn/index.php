@@ -77,7 +77,7 @@ if (isset($_POST['id'])) {
         }
     }
 
-    if ($_POST['post_processing_rule'] == 'true') {
+    if (@$_POST['post_processing_rule'] == 'true') {
         $matches_name = $_POST['post_processing_rule_matching'];
         if (@$_POST['post_processing_rule_matching_format'] != 'regex') {
             $matches_name = preg_quote($matches_name);
