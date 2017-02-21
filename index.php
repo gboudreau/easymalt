@@ -54,80 +54,17 @@ function getPageUrlForMonth($month, $options = 0) {
     <div style="text-align: center">
         <br/>
         Selected category: <strong><?php phe($_GET['cat']) ?></strong><br/>
-        &lt; <a href="/<?php echo getPageUrlForMonth($month, OPT_NO_CAT) ?>">Back</a> to all categories
+        &lt; <a href="<?php echo getPageUrlForMonth($month, OPT_NO_CAT) ?>">Back</a> to all categories
     </div>
 <?php endif; ?>
 
-<?php
-function printTransactionsTable($data, $what) {
-    global $month;
-    $total = [];
-    $even = FALSE;
-    ?>
-    <h3><?php phe($what) ?></h3>
-    <table class="" cellspacing="0">
-        <tr>
-            <th>Date</th>
-            <th>Description</th>
-            <th>Category</th>
-            <th>Amount</th>
-            <th>Account</th>
-            <th>&nbsp;</th>
-        </tr>
-        <?php foreach ($data as $row) : ?>
-            <?php
-            if (@$row->hidden != 'yes') {
-                @$total[$row->currency] += $row->amount;
-            }
-            ?>
-            <tr class="<?php echo ($row->amount >= 0 ? 'Income' : 'Expenses') . " " . (($even=!$even) ? 'even' : 'odd') . " " . (@$row->hidden == 'yes' ? 'hidden' : '') ?>">
-                <td><?php echo substr($row->date, 0, 10) ?></td>
-                <td>
-                    <?php phe($row->name) ?><br/>
-                    <small><?php echo nl2br(he($row->memo)) ?></small>
-                </td>
-                <td>
-                    <?php if (!empty($_GET['cat']) && $row->category == $_GET['cat']) : ?>
-                        <?php phe($row->category) ?>
-                    <?php else: ?>
-                        <a href="?cat=<?php echo urlencode($row->category) ?>&month=<?php echo urlencode($month) ?>"><?php phe($row->category) ?></a>
-                    <?php endif; ?>
-                    <br/><small><?php echo nl2br(he($row->tags)) ?></small>
-                </td>
-                <td style="text-align: right">
-                    <?php echo_amount($row->amount, $row->currency) ?>
-                </td>
-                <td style="max-width: 200px">
-                    <?php phe($row->account) ?>
-                </td>
-                <td>[<a href="/txn/?id=<?php echo $row->id ?>" onclick="return editTxn(this)">edit</a>]</td>
-            </tr>
-        <?php endforeach; ?>
-        <tr class="total <?php echo $what ?>">
-            <th>&nbsp;</th>
-            <th>&nbsp;</th>
-            <th>Total</th>
-            <th style="text-align: right">
-                <?php
-                foreach ($total as $currency => $tot) {
-                    if ($tot == 0 && !is_default_currency($currency)) {
-                        continue;
-                    }
-                    if (!is_default_currency($currency)) {
-                        echo "+&nbsp;";
-                    };
-                    echo_amount($tot, $currency);
-                    echo '<br/>';
-                }
-                ?>
-            </th>
-            <th>&nbsp;</th>
-            <th>&nbsp;</th>
-        </tr>
-    </table>
-    <?php
-}
-?>
+<?php if (empty($_GET['cat'])) : ?>
+    <div class="search" style="text-align: center">
+        <input id="search-field" type="text" value="" placeholder="Search..." />
+        <div style="display:none" class="example">Example: <code>category=Home: Supplies AND desc=something cool AND amount=10.24 AND tag=Vacation</code></div>
+    </div>
+<?php endif; ?>
+
 <?php
 $sections = [
     'Expenses' => [
@@ -300,6 +237,21 @@ if (empty($_GET['cat'])) {
         google.charts.load('current', {packages: ['corechart']});
         google.charts.setOnLoadCallback(drawPieExpenses);
         google.charts.setOnLoadCallback(drawPieIncome);
+
+        $(function() {
+            $('#search-field').on('focus', function(e) {
+                $('.search .example').show();
+            });
+            $('#search-field').on('keyup', function(e) {
+                if (e.keyCode == 13) {
+                    search();
+                }
+            });
+        });
+        function search() {
+            var query = $('#search-field').val();
+            window.location.href = '/search/?q=' + encodeURIComponent(query);
+        }
     <?php endif; ?>
 </script>
 

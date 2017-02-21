@@ -101,3 +101,72 @@ function echo_amount($amount, $currency = NULL) {
     echo_if($currency == $default_currency_name, $default_currency_symbol, $currency);
     echo '&nbsp;' . number_format($amount, 2);
 }
+
+function printTransactionsTable($data, $what) {
+    global $month;
+    $total = [];
+    $even = FALSE;
+    ?>
+    <h3><?php phe($what) ?></h3>
+    <table class="" cellspacing="0">
+        <tr>
+            <th>Date</th>
+            <th>Description</th>
+            <th>Category</th>
+            <th>Amount</th>
+            <th>Account</th>
+            <th>&nbsp;</th>
+        </tr>
+        <?php foreach ($data as $row) : ?>
+            <?php
+            if (@$row->hidden != 'yes') {
+                @$total[$row->currency] += $row->amount;
+            }
+            ?>
+            <tr class="<?php echo ($row->amount >= 0 ? 'Income' : 'Expenses') . " " . (($even=!$even) ? 'even' : 'odd') . " " . (@$row->hidden == 'yes' ? 'hidden' : '') ?>">
+                <td><?php echo substr($row->date, 0, 10) ?></td>
+                <td>
+                    <?php phe($row->name) ?><br/>
+                    <small><?php echo nl2br(he($row->memo)) ?></small>
+                </td>
+                <td>
+                    <?php if (!empty($_GET['cat']) && $row->category == $_GET['cat']) : ?>
+                        <?php phe($row->category) ?>
+                    <?php else: ?>
+                        <a href="?cat=<?php echo urlencode($row->category) ?>&month=<?php echo urlencode($month) ?>"><?php phe($row->category) ?></a>
+                    <?php endif; ?>
+                    <br/><small><?php echo nl2br(he($row->tags)) ?></small>
+                </td>
+                <td style="text-align: right">
+                    <?php echo_amount($row->amount, $row->currency) ?>
+                </td>
+                <td style="max-width: 200px">
+                    <?php phe($row->account) ?>
+                </td>
+                <td>[<a href="/txn/?id=<?php echo $row->id ?>" onclick="return editTxn(this)">edit</a>]</td>
+            </tr>
+        <?php endforeach; ?>
+        <tr class="total <?php echo $what ?>">
+            <th>&nbsp;</th>
+            <th>&nbsp;</th>
+            <th>Total</th>
+            <th style="text-align: right">
+                <?php
+                foreach ($total as $currency => $tot) {
+                    if ($tot == 0 && !is_default_currency($currency)) {
+                        continue;
+                    }
+                    if (!is_default_currency($currency)) {
+                        echo "+&nbsp;";
+                    };
+                    echo_amount($tot, $currency);
+                    echo '<br/>';
+                }
+                ?>
+            </th>
+            <th>&nbsp;</th>
+            <th>&nbsp;</th>
+        </tr>
+    </table>
+    <?php
+}

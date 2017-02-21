@@ -92,3 +92,10 @@ div.pie_chart {
     width: 70px;
     text-align: center;
 }
+
+div.search {
+    padding-top: 16px;
+}
+#search-field {
+    width: 200px;
+}
