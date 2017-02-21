@@ -3,8 +3,11 @@ namespace EasyMalt;
 chdir(__DIR__.'/..');
 require 'init.inc.php';
 
-$q = "SELECT * FROM transactions WHERE id = :id";
-$txn = DB::getFirst($q, (int) @$_REQUEST['id']);
+$default_currency = \EasyMalt\Config::get('DEFAULT_CURRENCY');
+$default_currency_name = array_keys($default_currency)[0];
+
+$q = "SELECT t.*, IFNULL(a.currency, :default_currency) AS currency FROM transactions t LEFT JOIN accounts a ON (t.account_id = a.id) WHERE t.id = :id";
+$txn = DB::getFirst($q, ['id' => (int) @$_REQUEST['id'], 'default_currency' => $default_currency_name]);
 if (empty($txn->tags)) {
     $txn->tags = [];
 } else {
