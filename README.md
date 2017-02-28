@@ -41,3 +41,10 @@ Installation
    I __strongly__ suggest using HTTPS ([Let's Encrypt](https://letsencrypt.org/) is nice), and configuring a htaccess password to protect your installation.
 
 4. Install the [Local Downloader & Importer](https://github.com/gboudreau/easymalt-local), and configure it to send its data to your web-app (it needs the URL to the _/api/_ folder, and the token you configured in _config.php_).
+
+
+Acknowledgements
+----------------
+Developed mainly using a free open-source license of  
+![PHPStorm](https://d3uepj124s5rcx.cloudfront.net/items/0V0z2p0e0K1D0F3t2r1P/logo_PhpStorm.png)  
+kindly provided by [JetBrains](http://www.jetbrains.com/). Thanks guys!
