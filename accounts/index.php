@@ -17,7 +17,7 @@ $data = DB::getAll($q);
     &lt; <a href="<?php phe($_SESSION['previous_page']) ?>">Back</a>
 </div>
 
-<table class="" cellspacing="0">
+<table class="accounts" cellspacing="0">
     <tr>
         <th>Account</th>
         <th>Balance</th>
@@ -25,7 +25,7 @@ $data = DB::getAll($q);
     </tr>
     <?php foreach ($data as $row) : ?>
         <tr class="<?php echo (($even=!@$even) ? 'even' : 'odd') ?>">
-            <td>
+            <td class="name">
                 <?php phe($row->name) ?>
             </td>
             <td style="text-align: right">

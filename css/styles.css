@@ -2,6 +2,9 @@ table tr td, table tr th {
     padding: 6px 14px;
     text-align: center;
 }
+table.accounts tr td.name {
+    text-align: left;
+}
 
 .txn_form table tr td {
     text-align: left;
