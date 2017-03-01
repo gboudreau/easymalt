@@ -233,25 +233,33 @@ $goto_link = $_SESSION['previous_page'] . (string_contains($_SESSION['previous_p
         crossorigin="anonymous"></script>
 <script>
     $(function() {
-        $('input, select').on('change', function() {
-            displayApplyToAll()
+        $('input, select').on('change', function(event) {
+            displayApplyToAll(event)
         });
-        $('input[type=text]').on('input', function() {
-            displayApplyToAll()
+        $('input[type=text]').on('input', function(event) {
+            displayApplyToAll(event)
         });
     });
     var initial_desc = <?php pjs($txn->display_name) ?>;
     var initial_tags = <?php pjs($txn->tags) ?>;
     var initial_category = <?php pjs($txn->category) ?>;
-    function displayApplyToAll() {
+    function displayApplyToAll(event) {
         var changed = false;
+
+        console.log($(event.target));
+
+        var initial = $(event.target).attr('id') == 'post_processing_rule';
+
+        var enabled = $('#post_processing_rule').prop('checked');
 
         var desc = $('[name=display_name]').val();
         if (desc != initial_desc) {
             changed = true;
             $('.apply_to_all .desc .value').text(desc);
             $('.apply_to_all .desc').show();
-            $('.apply_to_all .desc [type=checkbox]').prop('checked', true);
+            if (initial) {
+                $('.apply_to_all .desc [type=checkbox]').prop('checked', enabled);
+            }
         } else {
             $('.apply_to_all .desc').hide();
             $('.apply_to_all .desc [type=checkbox]').prop('checked', false);
@@ -264,7 +272,9 @@ $goto_link = $_SESSION['previous_page'] . (string_contains($_SESSION['previous_p
             changed = true;
             $('.apply_to_all .tags .value').text(tags.join(', '));
             $('.apply_to_all .tags').show();
-            $('.apply_to_all .tags [type=checkbox]').prop('checked', true);
+            if (initial) {
+                $('.apply_to_all .tags [type=checkbox]').prop('checked', enabled);
+            }
         } else {
             $('.apply_to_all .tags').hide();
             $('.apply_to_all .tags [type=checkbox]').prop('checked', false);
@@ -275,7 +285,9 @@ $goto_link = $_SESSION['previous_page'] . (string_contains($_SESSION['previous_p
             changed = true;
             $('.apply_to_all .category .value').text(category);
             $('.apply_to_all .category').show();
-            $('.apply_to_all .category [type=checkbox]').prop('checked', true);
+            if (initial) {
+                $('.apply_to_all .category [type=checkbox]').prop('checked', enabled);
+            }
         } else {
             $('.apply_to_all .category').hide();
             $('.apply_to_all .category [type=checkbox]').prop('checked', false);
@@ -287,7 +299,6 @@ $goto_link = $_SESSION['previous_page'] . (string_contains($_SESSION['previous_p
             $('.apply_to_all').hide();
         }
 
-        var enabled = $('#post_processing_rule').prop('checked');
         if (enabled) {
             $('.apply_to_all').addClass('selected');
         } else {
