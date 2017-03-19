@@ -25,7 +25,7 @@ $params = [];
 
 $query = explode(' AND ', $_GET['q']);
 foreach ($query as $q) {
-    if (preg_match('/(category|desc|amount|tag|date)\s?=\s?(.+)\s?/', $q, $matches)) {
+    if (preg_match('/(category|desc|amount|tag|date|account)\s?=\s?(.+)\s?/', $q, $matches)) {
         $value = trim($matches[2]);
         if ($matches[1] == 'category') {
             $where_conditions[] = 't.category LIKE :cat';
@@ -42,6 +42,14 @@ foreach ($query as $q) {
         if ($matches[1] == 'tag') {
             $where_conditions[] = 't.tag LIKE :tag';
             $params['tag'] = '%' . $value .'%';
+        }
+        if ($matches[1] == 'date') {
+            $where_conditions[] = 'DATE(t.date) = :date';
+            $params['date'] = date('Y-m-d', strtotime($value));
+        }
+        if ($matches[1] == 'account') {
+            $where_conditions[] = 'a.name LIKE :account';
+            $params['account'] = '%' . $value .'%';
         }
     }
 }

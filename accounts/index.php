@@ -26,7 +26,7 @@ $data = DB::getAll($q);
     <?php foreach ($data as $row) : ?>
         <tr class="<?php echo (($even=!@$even) ? 'even' : 'odd') ?>">
             <td class="name">
-                <?php phe($row->name) ?>
+                <a href="/search?q=<?php echo urlencode("account=$row->name") ?>"><?php phe($row->name) ?></a>
             </td>
             <td style="text-align: right">
                 <?php echo_amount($row->balance, $row->currency) ?>

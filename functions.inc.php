@@ -141,7 +141,7 @@ function printTransactionsTable($data, $what) {
                     <?php echo_amount($row->amount, $row->currency) ?>
                 </td>
                 <td style="max-width: 200px">
-                    <?php phe($row->account) ?>
+                    <a href="/search?q=<?php echo urlencode("account=$row->account") ?>"><?php phe($row->account) ?></a>
                 </td>
                 <td>[<a href="/txn/?id=<?php echo $row->id ?>" onclick="return editTxn(this)">edit</a>]</td>
             </tr>
