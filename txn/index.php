@@ -44,6 +44,10 @@ if (isset($_POST['id'])) {
         $updates[] = 'amount = :amount';
         $params['amount'] = (float) $_POST['amounts'][0];
     }
+    if (!empty($_POST['date'])) {
+        $updates[] = 'date = :date';
+        $params['date'] = $_POST['date'];
+    }
     $updates[] = 'tags = :tags';
     $params['tags'] = empty($_POST['tags']) ? NULL : implode(',', $_POST['tags']);
 
@@ -140,6 +144,11 @@ $goto_link = $_SESSION['previous_page'] . (string_contains($_SESSION['previous_p
         <tr>
             <td>
                 ID: <?php phe($txn->id) ?>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <input type="date" name="date" id="date" value="<?php phe(substr($txn->date, 0, 10)) ?>" />
             </td>
         </tr>
         <tr>
