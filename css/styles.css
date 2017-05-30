@@ -20,6 +20,9 @@ table.accounts tr td.name {
 .txn_form table tr td {
     text-align: left;
 }
+input[name=display_name] {
+    width: 300px;
+}
 
 table tr.even {
     background-color: #ddd;
