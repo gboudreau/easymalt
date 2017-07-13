@@ -40,7 +40,7 @@ foreach ($query as $q) {
             $params['amount'] = (float) $value;
         }
         if ($matches[1] == 'tag') {
-            $where_conditions[] = 't.tag LIKE :tag';
+            $where_conditions[] = 't.tags LIKE :tag';
             $params['tag'] = '%' . $value .'%';
         }
         if ($matches[1] == 'date') {
