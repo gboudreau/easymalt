@@ -103,8 +103,8 @@ if (isset($_POST['id'])) {
         $q = "INSERT INTO post_processing SET regex = :regex, " . implode(", ", $updates) . " ON DUPLICATE KEY UPDATE " . implode(", ", $updates);
         DB::insert($q, array_merge($params, ['regex' => $matches_name]));
 
-        $q = "SELECT id FROM transactions WHERE `name` REGEXP :regex";
-        $txn_ids = DB::getAllValues($q, $matches_name);
+        $q = "SELECT id FROM transactions WHERE `name` REGEXP :regex AND post_processed = 'no' OR id >= :id";
+        $txn_ids = DB::getAllValues($q, ['regex' => $matches_name, 'id' => $_POST['id']]);
 
         $updates[] = "post_processed = 'yes'";
         foreach ($txn_ids as $txn_id) {
