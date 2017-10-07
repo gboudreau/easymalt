@@ -91,8 +91,8 @@ $sections = [
             $_where .= " AND (group_by_category = :cat OR category = :cat)";
             $params['cat'] = $_GET['cat'];
         }
-        $q = "SELECT t.id, `date`, t.`name`, memo, category, tags, amount, a.currency, a.name AS account
-                FROM v_transactions_reports t JOIN accounts a ON (t.account_id = a.id)
+        $q = "SELECT t.id, `date`, t.`name`, memo, category, tags, amount, IFNULL(a.currency, 'CAD') AS currency, IFNULL(a.name, 'Unknown Account') AS account
+                FROM v_transactions_reports t LEFT JOIN accounts a ON (t.account_id = a.id)
                WHERE $_where
                ORDER BY `date` DESC, id DESC";
         $data = DB::getAll($q, $params);
@@ -103,8 +103,8 @@ $sections = [
 
         printTransactionsTable($data, $what);
     } else {
-        $q = "SELECT `month`, IFNULL(group_by_category, :no_name_cat) AS category, SUM(amount) AS amount, a.currency
-                FROM v_transactions_reports t JOIN accounts a ON (t.account_id = a.id)
+        $q = "SELECT `month`, IFNULL(group_by_category, :no_name_cat) AS category, SUM(amount) AS amount, IFNULL(a.currency, 'CAD') AS currency
+                FROM v_transactions_reports t LEFT JOIN accounts a ON (t.account_id = a.id)
                WHERE `month` = :month
                  AND $where
                  AND t.hidden = 'no'
@@ -193,8 +193,8 @@ $sections = [
 
 <?php
 if (empty($_GET['cat'])) {
-    $q = "SELECT t.id, `date`, t.`name`, memo, category, tags, amount, a.currency, a.name AS account, t.hidden
-                    FROM v_transactions_reports t JOIN accounts a ON (t.account_id = a.id)
+    $q = "SELECT t.id, `date`, t.`name`, memo, category, tags, amount, t.hidden, IFNULL(a.currency, 'CAD') AS currency, IFNULL(a.name, 'Unknown Account') AS account
+                    FROM v_transactions_reports t LEFT JOIN accounts a ON (t.account_id = a.id)
                    WHERE `month` = :month
                    ORDER BY `date` DESC, id DESC";
     $data = DB::getAll($q, $month);
