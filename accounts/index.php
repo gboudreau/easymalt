@@ -3,7 +3,7 @@ namespace EasyMalt;
 chdir(__DIR__.'/..');
 require 'init.inc.php';
 
-$q = "SELECT `name`, currency,  balance, SUBSTR(balance_date, 1, 16) AS last_updated FROM accounts WHERE balance <> 0 AND account_number NOT LIKE '-%' ORDER BY `name`";
+$q = "SELECT `name`, currency,  balance, SUBSTR(balance_date, 1, 16) AS last_updated FROM accounts WHERE account_number NOT LIKE '-%' ORDER BY `name`";
 $data = DB::getAll($q);
 ?>
 <html>
