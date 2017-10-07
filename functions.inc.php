@@ -132,8 +132,10 @@ function printTransactionsTable($data, $what) {
                 <td>
                     <?php if (!empty($_GET['cat']) && $row->category == $_GET['cat']) : ?>
                         <?php phe($row->category) ?>
+                    <?php elseif (!empty($_GET['q'])): ?>
+                        <a href="?q=<?php echo urlencode($_GET['q']) ?>&amp;cat=<?php echo urlencode($row->category) ?>"><?php phe($row->category) ?></a>
                     <?php else: ?>
-                        <a href="?cat=<?php echo urlencode($row->category) ?>&month=<?php echo urlencode($month) ?>"><?php phe($row->category) ?></a>
+                        <a href="?cat=<?php echo urlencode($row->category) ?>&amp;month=<?php echo urlencode($month) ?>"><?php phe($row->category) ?></a>
                     <?php endif; ?>
                     <br/><small><?php echo nl2br(he($row->tags)) ?></small>
                 </td>

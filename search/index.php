@@ -54,6 +54,13 @@ foreach ($query as $q) {
     }
 }
 
+if (!empty($_GET['cat'])) {
+    if (!isset($params['cat'])) {
+        $where_conditions[] = 't.category LIKE :cat';
+    }
+    $params['cat'] = $_GET['cat'];
+}
+
 if (!empty($where_conditions)) {
     $q = "SELECT t.id, `date`, t.`name`, memo, category, tags, amount, a.currency, a.name AS account, t.hidden
                     FROM v_transactions_reports t JOIN accounts a ON (t.account_id = a.id)
