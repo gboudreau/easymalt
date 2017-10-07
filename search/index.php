@@ -52,6 +52,14 @@ foreach ($query as $q) {
             $where_conditions[] = 'a.name LIKE :account';
             $params['account'] = '%' . $value .'%';
         }
+    } else {
+        if (is_numeric($q)) {
+            $where_conditions[] = 'ABS(ROUND(t.amount*100)) = ABS(ROUND(:amount*100))';
+            $params['amount'] = (float) $q;
+        } else {
+            $where_conditions[] = '(t.memo LIKE :desc OR t.name LIKE :desc)';
+            $params['desc'] = '%' . $q .'%';
+        }
     }
 }
 
