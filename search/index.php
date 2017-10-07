@@ -15,9 +15,9 @@ require 'init.inc.php';
 
 <h3>Search results</h3>
 
-<div>
-    Query: <input id="search-field" type="text" value="<?php phe($_GET['q']) ?>" placeholder="Search..." />
-</div>
+<form action="" method="get">
+    Query: <input id="search-field" name="q" type="text" value="<?php phe($_GET['q']) ?>" placeholder="Search..."/>
+</form>
 
 <?php
 $where_conditions = [];
