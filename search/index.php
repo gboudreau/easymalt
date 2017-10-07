@@ -25,29 +25,30 @@ $params = [];
 
 $query = explode(' AND ', $_GET['q']);
 foreach ($query as $q) {
-    if (preg_match('/(category|desc|amount|tag|date|account)\s?=\s?(.+)\s?/', $q, $matches)) {
+    if (preg_match('/(category|cat|desc|amount|tag|date|account)\s?=\s?(.+)\s?/', $q, $matches)) {
+        $query_type = strtolower($matches[1]);
         $value = trim($matches[2]);
-        if ($matches[1] == 'category') {
+        if ($query_type == 'category' || $query_type == 'cat') {
             $where_conditions[] = 't.category LIKE :cat';
             $params['cat'] = '%' . $value .'%';
         }
-        if ($matches[1] == 'desc') {
+        if ($query_type == 'desc') {
             $where_conditions[] = '(t.memo LIKE :desc OR t.name LIKE :desc)';
             $params['desc'] = '%' . $value .'%';
         }
-        if ($matches[1] == 'amount') {
+        if ($query_type == 'amount') {
             $where_conditions[] = 'ABS(ROUND(t.amount*100)) = ABS(ROUND(:amount*100))';
             $params['amount'] = (float) $value;
         }
-        if ($matches[1] == 'tag') {
+        if ($query_type == 'tag') {
             $where_conditions[] = 't.tags LIKE :tag';
             $params['tag'] = '%' . $value .'%';
         }
-        if ($matches[1] == 'date') {
+        if ($query_type == 'date') {
             $where_conditions[] = 'DATE(t.date) = :date';
             $params['date'] = date('Y-m-d', strtotime($value));
         }
-        if ($matches[1] == 'account') {
+        if ($query_type == 'account') {
             $where_conditions[] = 'a.name LIKE :account';
             $params['account'] = '%' . $value .'%';
         }
