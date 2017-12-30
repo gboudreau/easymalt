@@ -25,9 +25,10 @@ $params = [];
 
 $query = explode(' AND ', $_GET['q']);
 foreach ($query as $q) {
-    if (preg_match('/(category|cat|desc|amount|tag|date|account)\s?=\s?(.+)\s?/', $q, $matches)) {
+    if (preg_match('/(category|cat|desc|amount|tag|date|account)\s?([=><])\s?(.+)\s?/', $q, $matches)) {
         $query_type = strtolower($matches[1]);
-        $value = trim($matches[2]);
+        $operator = $matches[2];
+        $value = trim($matches[3]);
         if ($query_type == 'category' || $query_type == 'cat') {
             $where_conditions[] = 't.category LIKE :cat';
             $params['cat'] = '%' . $value .'%';
@@ -37,7 +38,7 @@ foreach ($query as $q) {
             $params['desc'] = '%' . $value .'%';
         }
         if ($query_type == 'amount') {
-            $where_conditions[] = 'ABS(ROUND(t.amount*100)) = ABS(ROUND(:amount*100))';
+            $where_conditions[] = 'ABS(ROUND(t.amount*100)) ' . $operator . ' ABS(ROUND(:amount*100))';
             $params['amount'] = (float) $value;
         }
         if ($query_type == 'tag') {
@@ -45,7 +46,7 @@ foreach ($query as $q) {
             $params['tag'] = '%' . $value .'%';
         }
         if ($query_type == 'date') {
-            $where_conditions[] = 'DATE(t.date) = :date';
+            $where_conditions[] = 'DATE(t.date) ' . $operator . ' :date';
             $params['date'] = date('Y-m-d', strtotime($value));
         }
         if ($query_type == 'account') {
