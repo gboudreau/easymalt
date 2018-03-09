@@ -235,8 +235,12 @@ if (empty($_GET['cat'])) {
 
     <?php if (empty($_GET['cat'])) : ?>
         google.charts.load('current', {packages: ['corechart']});
-        google.charts.setOnLoadCallback(drawPieExpenses);
-        google.charts.setOnLoadCallback(drawPieIncome);
+        if (typeof drawPieExpenses === 'function') {
+            google.charts.setOnLoadCallback(drawPieExpenses);
+        }
+        if (typeof drawPieIncome === 'function') {
+            google.charts.setOnLoadCallback(drawPieIncome);
+        }
 
         $(function() {
             $('#search-field').on('focus', function(e) {
