@@ -43,16 +43,37 @@ class DB
     }
 
     public static function execute($q, $args = array(), $retryOnError = TRUE) {
+        // Handle array arguments; eg. $q = "[...] WHERE id IN (:users)", $args = ['users' => array([...])]
+        if (is_array($args)) {
+            foreach ($args as $k => $v) {
+                if (is_array($v)) {
+                    unset($args[$k]);
+                    $inQuery = [];
+                    $i = 0;
+                    foreach ($v as $el) {
+                        $inQuery[] = ":$k" . "_$i";
+                        $args["$k" . "_$i"] = $el;
+                        $i++;
+                    }
+                    $q = str_replace(":$k", implode(', ', $inQuery), $q);
+                }
+            }
+        }
+
         $stmt = static::$handle->prepare($q);
+
         if (!is_array($args)) {
             // If there is only one argument; no need to use an array for $args
             if (preg_match('/:([a-z0-9_]+)/', $q, $re)) {
                 $args = array($re[1] => $args);
             }
         }
+
+        // Bind arguments
         foreach ($args as $key => $value) {
             $stmt->bindValue(":$key", $value);
         }
+
         try {
             $stmt->execute();
             return $stmt;

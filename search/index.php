@@ -25,10 +25,14 @@ $params = [];
 
 $query = explode(' AND ', $_GET['q']);
 foreach ($query as $q) {
-    if (preg_match('/(category|cat|desc|amount|tag|date|account)\s?([=><])\s?(.+)\s?/', $q, $matches)) {
+    if (preg_match('/(category|cat|desc|amount|tag|date|account|ids)\s?([=><])\s?(.+)\s?/', $q, $matches)) {
         $query_type = strtolower($matches[1]);
         $operator = $matches[2];
         $value = trim($matches[3]);
+        if ($query_type == 'ids') {
+            $where_conditions[] = 't.id IN (:ids)';
+            $params['ids'] = explode(',', $value);
+        }
         if ($query_type == 'category' || $query_type == 'cat') {
             $where_conditions[] = 't.category LIKE :cat';
             $params['cat'] = '%' . $value .'%';

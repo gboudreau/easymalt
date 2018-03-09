@@ -36,10 +36,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
 
     echo "[R] Importing transactions ... \n";
+    $new_txn_ids = [];
     foreach ($json->transactions as $txn) {
         $q = "INSERT IGNORE INTO transactions
                  SET account_id = :account_id, unique_id = :unique_id, `date` = :date, `type` = :type, amount = :amount, name = :name, memo = :memo";
-        DB::insert(
+        $new_txn_ids[] = DB::insert(
             $q,
             [
                 'account_id' => $txn->account_id,
@@ -54,6 +55,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
 
     postProcess();
+
+    $url = $_SERVER['REQUEST_SCHEME'] . '://' . $_SERVER['SERVER_NAME'] . '/search/';
+    $q = "ids=" . implode(',', $new_txn_ids);
+    echo "\n\nReview new transactions here: $url?q=" . urlencode($q);
 } else {
     die('meh');
 }
