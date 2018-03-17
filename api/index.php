@@ -40,7 +40,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     foreach ($json->transactions as $txn) {
         $q = "INSERT IGNORE INTO transactions
                  SET account_id = :account_id, unique_id = :unique_id, `date` = :date, `type` = :type, amount = :amount, name = :name, memo = :memo";
-        $new_txn_ids[] = DB::insert(
+        $id = DB::insert(
             $q,
             [
                 'account_id' => $txn->account_id,
@@ -52,6 +52,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 'memo' => $txn->memo
             ]
         );
+        if (!empty($id)) {
+            $new_txn_ids[] = $id;
+        }
     }
 
     postProcess();
