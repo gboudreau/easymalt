@@ -5,6 +5,8 @@ require 'init.inc.php';
 
 $q = "SELECT `name`, currency,  balance, SUBSTR(balance_date, 1, 16) AS last_updated FROM accounts WHERE account_number NOT LIKE '-%' ORDER BY `name`";
 $data = DB::getAll($q);
+
+$totals = [];
 ?>
 <html>
 <head>
@@ -24,6 +26,7 @@ $data = DB::getAll($q);
         <th>Last Updated</th>
     </tr>
     <?php foreach ($data as $row) : ?>
+        <?php $totals[$row->currency] += $row->balance; ?>
         <tr class="<?php echo (($even=!@$even) ? 'even' : 'odd') ?>">
             <td class="name">
                 <a href="/search?q=<?php echo urlencode("account=$row->name") ?>"><?php phe($row->name) ?></a>
@@ -33,6 +36,18 @@ $data = DB::getAll($q);
             </td>
             <td>
                 <?php echo (empty($row->last_updated) ? 'N/A' : he($row->last_updated)) ?>
+            </td>
+        </tr>
+    <?php endforeach; ?>
+    <?php foreach ($totals as $currency => $total) : ?>
+        <tr class="<?php echo (($even=!@$even) ? 'even' : 'odd') ?>">
+            <td class="name">
+                Total (<?php echo $currency ?>)
+            </td>
+            <td style="text-align: right">
+                <?php echo_amount($total, $currency) ?>
+            </td>
+            <td>
             </td>
         </tr>
     <?php endforeach; ?>
