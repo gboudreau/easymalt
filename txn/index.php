@@ -120,7 +120,7 @@ if (isset($_POST['id'])) {
 $q = "SELECT `name` FROM tags ORDER BY `name`";
 $tags = DB::getAllValues($q);
 
-$q = "SELECT DISTINCT category FROM transactions ORDER BY category";
+$q = "SELECT DISTINCT category FROM (SELECT category FROM transactions UNION ALL SELECT name FROM categories) a ORDER BY category";
 $cats = DB::getAllValues($q);
 
 $goto_link = $_SESSION['previous_page'] . (string_contains($_SESSION['previous_page'], '?') ? '&' : '?') .'scrollPos=' . $_GET['scrollPos'];

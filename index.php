@@ -228,9 +228,8 @@ if (empty($_GET['cat'])) {
     });
 
     function editTxn(el) {
-        var uri = $(el).attr('href') + '&scrollPos=' + scrollPosition;
-        window.location.href = uri;
-        return false;
+        $(el).attr('href', $(el).attr('href') + '&scrollPos=' + scrollPosition);
+        return true;
     }
 
     <?php if (empty($_GET['cat'])) : ?>

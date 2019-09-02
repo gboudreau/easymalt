@@ -5,7 +5,6 @@ require 'init.inc.php';
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $access_token = getAccessTokenFromHttpHeaders();
-    error_log($access_token);
     if (!$access_token || $access_token != Config::get('API_AUTH_ACCESS_TOKEN')) {
         header($_SERVER['SERVER_PROTOCOL'] . " 403 Forbidden", TRUE, 403);
         die("Failed authentication.");
@@ -59,9 +58,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     postProcess();
 
-    $url = $_SERVER['REQUEST_SCHEME'] . '://' . $_SERVER['SERVER_NAME'] . '/search/';
-    $q = "ids=" . implode(',', $new_txn_ids);
-    echo "\n\nReview new transactions here: $url?q=" . urlencode($q);
+    if (!empty($new_txn_ids)) {
+        $url = $_SERVER['REQUEST_SCHEME'] . '://' . $_SERVER['SERVER_NAME'] . '/search/';
+        $q = "ids=" . implode(',', array_unique($new_txn_ids));
+        $url = "$url?q=" . urlencode($q);
+        echo "\nReview new transactions here: ";
+        if ($_REQUEST['format'] == 'html') {
+            echo "<a href='$url'>$url</a>";
+        } else {
+            echo $url;
+        }
+    }
 } else {
     die('meh');
 }

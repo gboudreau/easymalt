@@ -28,6 +28,14 @@ function _array_shift($array) {
     return array_shift($array);
 }
 
+function last($array) {
+    return array_pop($array);
+}
+
+function first($array) {
+    return array_shift($array);
+}
+
 function sendPOST($url, $data, $headers=array()) {
     $ch = curl_init();
 
@@ -58,7 +66,7 @@ function sendGET($url, $headers=array()) {
     $result = curl_exec($ch);
 
     if (!$result) {
-        error_log("Error executing sendGET($url); cURL error: " . curl_errno($ch));
+        throw new Exception("Error executing sendGET($url); cURL error: " . curl_errno($ch) . " " . curl_error($ch), curl_errno($ch));
     }
 
     curl_close($ch);

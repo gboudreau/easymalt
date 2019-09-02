@@ -137,9 +137,8 @@ $transactions = DB::getAll($q, $params);
         <?php endif; ?>
     });
     function editTxn(el) {
-        var uri = $(el).attr('href') + '&scrollPos=' + scrollPosition;
-        window.location.href = uri;
-        return false;
+        $(el).attr('href', $(el).attr('href') + '&scrollPos=' + scrollPosition);
+        return true;
     }
 </script>
 </body>
