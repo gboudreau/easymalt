@@ -59,7 +59,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     postProcess();
 
     if (!empty($new_txn_ids)) {
-        $url = $_SERVER['REQUEST_SCHEME'] . '://' . $_SERVER['SERVER_NAME'] . '/search/';
+        $url = $_SERVER['REQUEST_SCHEME'] . '://' . $_SERVER['SERVER_NAME'] . '/';
         $q = "ids=" . implode(',', array_unique($new_txn_ids));
         $url = "$url?q=" . urlencode($q);
         echo "\nReview new transactions here: ";

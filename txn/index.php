@@ -133,7 +133,7 @@ $goto_link = $_SESSION['previous_page'] . (string_contains($_SESSION['previous_p
 </head>
 <body>
 
-<div style="text-align: center">
+<div style="text-align: left">
     &lt; <a href="<?php phe($goto_link) ?>">Back</a>
 </div>
 

@@ -15,7 +15,7 @@ $totals = [];
     <link rel="stylesheet" type="text/css" href="../css/styles.css">
 </head>
 <body>
-<div style="text-align: center">
+<div style="text-align: left">
     &lt; <a href="<?php phe($_SESSION['previous_page']) ?>">Back</a>
 </div>
 

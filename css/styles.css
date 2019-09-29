@@ -1,12 +1,12 @@
-@import url('https://fonts.googleapis.com/css?family=Lato');
+@import url('https://fonts.googleapis.com/css?family=Lato:400,400i,700,700i&display=swap');
 
 html, body, table, input[type=date] {
     font-family: 'Lato', sans-serif;
-    font-size: 14px !important;
+    font-size: 1em !important;
 }
 
 input, textarea, select, button {
-    font-size: 14px !important;
+    font-size: 1em !important;
 }
 
 table tr td, table tr th {
@@ -17,7 +17,7 @@ table.accounts tr td.name {
     text-align: left;
 }
 
-.txn_form table tr td {
+.txn_form table tr td, table.search_query tr td {
     text-align: left;
 }
 input[name=display_name] {
@@ -76,15 +76,6 @@ div.pie_chart {
     width: 70%;
 }
 
-@media only screen and (max-device-width: 480px) and (-webkit-min-device-pixel-ratio: 3) {
-    div.pie_chart {
-        width: 100%;
-    }
-    table {
-        width: 100%;
-    }
-}
-
 .apply_to_all {
     display: none;
     color: lightgrey;
@@ -115,4 +106,55 @@ div.search {
 }
 #search-field {
     width: 200px;
+}
+
+table.txn_details tr td.amount {
+    text-align: right;
+}
+table.txn_details tr td.account {
+    max-width: 200px;
+}
+@media only screen and (max-device-width: 480px) {
+    html, body, table, input, textarea, select, button {
+        font-size: 1.1em !important;
+    }
+    div.pie_chart, .with_pie_chart {
+        display: none;
+    }
+    table {
+        width: 100%;
+    }
+    table.txn_details tr th {
+        display: none;
+    }
+    table.txn_details, table.txn_details tr, table.txn_details tr td {
+        text-align: left !important;
+    }
+    table.txn_details tr td {
+        display: block;
+        box-sizing: border-box;
+        clear: both;
+        border-bottom: none;
+    }
+    table.txn_details tr td:last-child {
+        border-bottom: 1px solid;
+    }
+    table.txn_details tr td.amount {
+        width: auto !important;
+        display: inline;
+        position: absolute;
+        right: 4px;
+        font-weight: bold;
+        font-size: 1.2em;
+    }
+    table.txn_details tr td.category, table.txn_details tr td.account {
+        max-width: inherit;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+}
+
+table.search_query td:last-child {
+    min-width: 410px;
 }
