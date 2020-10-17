@@ -110,6 +110,15 @@ function postProcess() {
                     $params['display_name'] = $display_name;
                     $log_details[] = "Name: $display_name";
                 }
+                if ($pp->memo !== NULL) {
+                    $updates[] = 'memo = :memo';
+                    $memo = $pp->memo;
+                    for ($i=1; $i<count($re); $i++) {
+                        $memo = str_replace('{'.$i.'}', $re[$i], $memo);
+                    }
+                    $params['memo'] = $memo;
+                    $log_details[] = "Memo: $memo";
+                }
                 if (!empty($pp->category)) {
                     $updates[] = 'category = :category';
                     $params['category'] = $pp->category;

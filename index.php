@@ -465,12 +465,18 @@ function printTransactionsTable($data, $what) {
             if ($row->category === NULL) {
                 $row->category = NO_CATEGORY_NAME;
             }
+            $row->memo = he($row->memo);
+            if (preg_match_all('/Ref: #(\d+)/', $row->memo, $re)) {
+                for ($i=0; $i<count($re[0]); $i++) {
+                    $row->memo = str_replace($re[0][$i], 'Ref: <a href="/txn/?id='. $re[1][$i].'" onclick="return editTxn(this)">#'. $re[1][$i].'</a>', $row->memo);
+                }
+            }
             ?>
             <tr class="<?php echo ($row->amount >= 0 ? 'Income' : 'Expenses') . " " . (($even=!$even) ? 'even' : 'odd') . " " . (@$row->hidden == 'yes' ? 'hidden' : '') ?>">
                 <td class="date first"><?php echo substr($row->date, 0, 10) ?></td>
                 <td class="name">
                     <?php phe($row->name) ?><br/>
-                    <small><?php echo nl2br(he($row->memo)) ?></small>
+                    <small><?php echo nl2br($row->memo) ?></small>
                 </td>
                 <td class="category">
                     <a href="<?php echo getCurrentUrlReplacing('category', $row->category) ?>"><?php phe($row->category) ?></a>
