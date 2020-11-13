@@ -131,7 +131,7 @@ $goto_link = $_SESSION['previous_page'] . (string_contains($_SESSION['previous_p
     <meta name="viewport" content="initial-scale=1.0, user-scalable=yes, width=device-width">
     <link rel="stylesheet" type="text/css" href="../css/styles.css">
 </head>
-<body>
+<body class="<?php echo ($is_dark ? 'dark' : '') ?>">
 
 <div style="text-align: left">
     &lt; <a href="<?php phe($goto_link) ?>">Back</a>

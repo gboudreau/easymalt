@@ -158,3 +158,38 @@ table.txn_details tr td.account {
 table.search_query td:last-child {
     min-width: 410px;
 }
+
+#dark_switcher {
+    position: fixed;
+    top: 10px;
+    right: 15px;
+}
+body.dark {
+    background-color: #333;
+    color: #eee;
+}
+.dark a {
+    color: pink;
+}
+.dark table tr.expenses.even {
+    background-color: #ae90a0;
+}
+.dark table tr.expenses.odd {
+    background-color: #aea0a0;
+}
+.dark table tr.income.even {
+    background-color: #90ae90;
+}
+.dark table tr.income.odd {
+    background-color: #a0aea0;
+}
+.dark table tr.total.expenses {
+    color: rgb(215, 152, 163);
+}
+.dark table tr.hidden, table tr.hidden a {
+    color: #666;
+    background-color: #444 !important;
+}
+.dark .apply_to_all {
+    background-color: #444;
+}

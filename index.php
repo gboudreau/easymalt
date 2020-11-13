@@ -40,8 +40,11 @@ if (!empty($_POST['do_search'])) {
     <meta name="viewport" content="initial-scale=1.0, user-scalable=no, width=device-width">
     <link rel="stylesheet" type="text/css" href="css/styles.css">
 </head>
-<body>
+<body class="<?php echo ($is_dark ? 'dark' : '') ?>">
 
+<div id="dark_switcher">
+    <a href="./?dark=<?php echo ($is_dark ? 0 : 1)?>">Go <?php echo ($is_dark ? 'light' : 'dark')?></a>
+</div>
 <div style="text-align: center">
     Go to:
     <a href="accounts/">Accounts</a>
@@ -394,9 +397,12 @@ $sections = [
             ?>
             var data = google.visualization.arrayToDataTable(<?php echo json_encode($js_data); ?>);
 
+            var is_dark = $('body').hasClass('dark');
             var options = {
                 is3D: true,
-                sliceVisibilityThreshold: 3/100.0
+                sliceVisibilityThreshold: 3/100.0,
+                backgroundColor: is_dark ? '#333' : 'white',
+                legend: {textStyle: {color: is_dark ? '#eee' : 'black'}}
             };
 
             var chart = new google.visualization.PieChart(document.getElementById('chart_div_<?php echo $what ?>'));
