@@ -17,6 +17,6 @@ ini_set('error_reporting', E_ALL);
 
 session_start();
 
-if (!is_writable(session_save_path())) {
+if (!empty(session_save_path()) && !is_writable(session_save_path())) {
     echo '<div style="color:red">Warning: Session path "'.session_save_path().'" is not writable for PHP!</div>';
 }
