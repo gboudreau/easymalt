@@ -186,7 +186,7 @@ body.dark {
 .dark table tr.total.expenses {
     color: rgb(215, 152, 163);
 }
-.dark table tr.hidden, table tr.hidden a {
+.dark table tr.hidden, .dark table tr.hidden a {
     color: #666;
     background-color: #444 !important;
 }
