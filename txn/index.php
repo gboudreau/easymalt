@@ -86,11 +86,19 @@ if (isset($_POST['id'])) {
         if (@$_POST['post_processing_rule_matching_format'] != 'regex') {
             $matches_name = preg_quote($matches_name);
         }
+        $matches_amount = NULL;
+        if (!empty($_POST['post_processing_rule_amount_equals'])) {
+            $matches_amount = $_POST['post_processing_rule_amount_equals'];
+        }
         $updates = [];
         $params = [];
         if (@$_POST['post_processing_rule_desc'] == 'true') {
             $updates[] = 'display_name = :display_name';
             $params['display_name'] = $_POST['display_name'];
+        }
+        if (@$_POST['post_processing_rule_memo'] == 'true') {
+            $updates[] = 'memo = :memo';
+            $params['memo'] = $_POST['memo'];
         }
         if (@$_POST['post_processing_rule_category'] == 'true') {
             $updates[] = 'category = :category';
@@ -100,11 +108,16 @@ if (isset($_POST['id'])) {
             $updates[] = 'tags = :tags';
             $params['tags'] = empty($_POST['tags']) ? NULL : implode(',', $_POST['tags']);
         }
-        $q = "INSERT INTO post_processing SET regex = :regex, " . implode(", ", $updates) . " ON DUPLICATE KEY UPDATE " . implode(", ", $updates);
-        DB::insert($q, array_merge($params, ['regex' => $matches_name]));
+        $q = "INSERT INTO post_processing SET regex = :regex, amount_equals = :amount_equals, " . implode(", ", $updates) . " ON DUPLICATE KEY UPDATE " . implode(", ", $updates);
+        DB::insert($q, array_merge($params, ['regex' => $matches_name, 'amount_equals' => $matches_amount]));
 
         $q = "SELECT id FROM transactions WHERE `name` REGEXP :regex AND (post_processed = 'no' OR id >= :id)";
-        $txn_ids = DB::getAllValues($q, ['regex' => $matches_name, 'id' => $_POST['id']]);
+        $pp = ['regex' => $matches_name, 'id' => $_POST['id']];
+        if (!empty($matches_amount)) {
+            $q .= " AND amount = :matches_amount";
+            $pp['matches_amount'] = $matches_amount;
+        }
+        $txn_ids = DB::getAllValues($q, $pp);
 
         $updates[] = "post_processed = 'yes'";
         foreach ($txn_ids as $txn_id) {
@@ -203,12 +216,24 @@ $goto_link = $_SESSION['previous_page'] . (string_contains($_SESSION['previous_p
                        </label>
                        <input type="text" name="post_processing_rule_matching" value="<?php phe($txn->name) ?>" />
                        (<label for="post_processing_rule_matching_format">is RegExp</label>: <input type="checkbox" id="post_processing_rule_matching_format" name="post_processing_rule_matching_format" value="regex" />)
+                       AND
+                       amount is equal to
+                       <input type="text" name="post_processing_rule_amount_equals" value="" style="width: 50px; text-align: center" />
+                       (leave empty to NOT match against amount)
                    </div>
                    <ul>
                        <li class="desc">
                            <input type="checkbox" id="post_processing_rule_desc" name="post_processing_rule_desc" value="true" />
                            <label for="post_processing_rule_desc">
                                Short description: <span class="value"></span>
+                           </label>
+                       </li>
+                   </ul>
+                   <ul>
+                       <li class="memo">
+                           <input type="checkbox" id="post_processing_rule_memo" name="post_processing_rule_memo" value="true" />
+                           <label for="post_processing_rule_memo">
+                               Memo: <span class="value"></span>
                            </label>
                        </li>
                    </ul>
@@ -242,7 +267,7 @@ $goto_link = $_SESSION['previous_page'] . (string_contains($_SESSION['previous_p
         crossorigin="anonymous"></script>
 <script>
     $(function() {
-        $('input, select').on('change', function(event) {
+        $('input, select, textarea').on('change', function(event) {
             displayApplyToAll(event)
         });
         $('input[type=text]').on('input', function(event) {
@@ -252,6 +277,7 @@ $goto_link = $_SESSION['previous_page'] . (string_contains($_SESSION['previous_p
     var initial_desc = <?php pjs($txn->display_name) ?>;
     var initial_tags = <?php pjs($txn->tags) ?>;
     var initial_category = <?php pjs($txn->category) ?>;
+    var initial_memo = <?php pjs($txn->memo) ?>;
     function displayApplyToAll(event) {
         var changed = false;
 
@@ -272,6 +298,19 @@ $goto_link = $_SESSION['previous_page'] . (string_contains($_SESSION['previous_p
         } else {
             $('.apply_to_all .desc').hide();
             $('.apply_to_all .desc [type=checkbox]').prop('checked', false);
+        }
+
+        var memo = $('[name=memo]').val();
+        if (memo != initial_memo) {
+            changed = true;
+            $('.apply_to_all .memo .value').text(memo);
+            $('.apply_to_all .memo').show();
+            if (initial) {
+                $('.apply_to_all .memo [type=checkbox]').prop('checked', enabled);
+            }
+        } else {
+            $('.apply_to_all .memo').hide();
+            $('.apply_to_all .memo [type=checkbox]').prop('checked', false);
         }
 
         var tags = $.map($('input[id^=tag_]:checked'), function(e,i) {

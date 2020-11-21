@@ -120,11 +120,13 @@ VALUES
 CREATE TABLE `post_processing` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `regex` varchar(100) NOT NULL DEFAULT '',
+  `amount_equals` float(7,2) DEFAULT NULL,
   `display_name` varchar(255) DEFAULT NULL,
   `category` varchar(100) DEFAULT NULL,
   `tags` varchar(255) DEFAULT NULL,
   `prio` tinyint(3) unsigned NOT NULL DEFAULT '0',
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `regex` (`regex`,`amount_equals`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 INSERT INTO `post_processing` (`id`, `regex`, `display_name`, `category`, `tags`, `prio`)

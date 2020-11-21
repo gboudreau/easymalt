@@ -97,7 +97,7 @@ function postProcess() {
     $transactions = DB::getAll($q);
     foreach ($transactions as $t) {
         foreach ($pp_settings as $pp) {
-            if (preg_match('@' . $pp->regex . '@i', $t->name . ' ' . $t->memo, $re)) {
+            if (preg_match('@' . $pp->regex . '@i', $t->name . ' ' . $t->memo, $re) && (empty($pp->amount_equals) || $pp->amount_equals == $t->amount)) {
                 $params = ['txn_id' => (int) $t->id];
                 $updates = [];
                 $log_details = [];
