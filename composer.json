@@ -1,5 +1,6 @@
 {
   "require": {
+    "delight-im/cookie": "^3.4.0"
   },
   "autoload": {
     "psr-4": { "EasyMalt\\": "classes/" }
