@@ -218,12 +218,15 @@ $ops_avail = ['=', '<', '<=', '>', '>='];
         <?php foreach ($query_values['date'] as $op => $value) : ?>
             <tr class="table-row-date" style="display: <?php echo_if(!empty($value), 'table-row', 'none') ?>">
                 <td>Date</td>
-                <td><select name="date_op[]">
+                <td>
+                    <select name="date_op[]">
                         <?php foreach ($ops_avail as $opa) : ?>
                             <option value="<?php phe($opa) ?>" <?php echo_if($op == $opa, 'selected="selected"') ?>><?php phe($opa) ?></option>
                         <?php endforeach; ?>
                     </select>
-                    <input name="date[]" type="date" value="<?php phe($value) ?>" /></td>
+                    <input name="date[]" type="date" value="<?php phe($op == '<=' && $value == date('Y-m-d') ? '' : $value) ?>" />
+                    [<a href="#clear" onclick="$(this).parent().find('input').val(''); return false">clear</a>]
+                </td>
             </tr>
         <?php endforeach; ?>
         <tr class="table-row-category" style="display: <?php echo_if(!empty($query_values['category']), 'table-row', 'none') ?>">
