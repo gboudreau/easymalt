@@ -6,6 +6,7 @@ CREATE TABLE `accounts` (
   `balance` float(9,2) NOT NULL DEFAULT '0.00',
   `currency` char(3) NOT NULL DEFAULT 'CAD',
   `balance_date` datetime DEFAULT NULL,
+  `plaid_id` varchar(50) CHARACTER SET latin1 DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `routing_number` (`routing_number`,`account_number`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -163,6 +164,7 @@ CREATE TABLE `transactions` (
   `post_processed` enum('yes','no') NOT NULL DEFAULT 'no',
   `linked_txn_id` int(11) unsigned DEFAULT NULL,
   `hidden` enum('yes','no') NOT NULL DEFAULT 'no',
+  `plaid_id` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `account_id` (`account_id`,`unique_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -181,5 +183,23 @@ CREATE VIEW `v_transactions_reports` AS
       t.memo AS `memo`,
       t.type AS `type`,
       t.account_id AS `account_id`,
-      IF(t.hidden = 'yes' OR t.category IN (SELECT `name` from categories where hidden = 'yes'), 'yes', 'no') AS hidden
+      IF(t.hidden = 'yes' OR t.category IN (SELECT `name` from categories where hidden = 'yes'), 'yes', 'no') AS hidden,
+      t.post_processed
   FROM transactions t;
+
+CREATE TABLE `plaid_events` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `webhook_type` enum('ITEM','TRANSACTIONS') DEFAULT NULL,
+  `webhook_code` varchar(50) DEFAULT NULL,
+  `item_id` varchar(50) DEFAULT NULL,
+  `json` text CHARACTER SET utf8mb4 DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+CREATE TABLE `plaid_tokens` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `plaid_item_id` varchar(50) NOT NULL DEFAULT '',
+  `access_token` varchar(200) DEFAULT NULL,
+  `metadata` mediumtext CHARACTER SET utf8mb4 DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=latin1;

@@ -1,6 +1,7 @@
 {
   "require": {
-    "delight-im/cookie": "^3.4.0"
+    "delight-im/cookie": "^3.4.0",
+    "tomorrow-ideas/plaid-sdk-php": "^1.0"
   },
   "autoload": {
     "psr-4": { "EasyMalt\\": "classes/" }

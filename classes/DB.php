@@ -37,6 +37,9 @@ class DB
             }
             // We don't need REPEATABLE-READ, which is the default, and will keep locks longer for no good reason.
             DB::execute("SET tx_isolation = 'READ-COMMITTED'");
+            if (!empty(Config::get('MYSQL_TIMEZONE'))) {
+                DB::execute("SET time_zone = :tz", Config::get('MYSQL_TIMEZONE'));
+            }
         } catch (\PDOException $e) {
             throw new \Exception("Can't connect to the database. Please try again later. Error: " . $e->getMessage());
         }
