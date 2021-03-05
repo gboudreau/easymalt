@@ -66,8 +66,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             if (empty($txns)) {
                 $body = NULL;
             } else {
-                $subject = "[Plaid Webhook] Transactions removed";
-                $body = "Removed transactions:\n" . implode("\n", $txns);
+                //$subject = "[Plaid Webhook] Transactions removed";
+                //$body = "Removed transactions:\n" . implode("\n", $txns);
+                $body = NULL;
             }
             break;
         case 'INITIAL_UPDATE':
@@ -84,8 +85,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     // Sandbox webhook
                     $body = NULL;
                 } else {
-                    $subject = "[Plaid Webhook] Transactions added";
-                    $body = "Import result:\n\n" . $result;
+                    //$subject = "[Plaid Webhook] Transactions added";
+                    //$body = "Import result:\n\n" . $result;
+                    $body = NULL;
                 }
             }
             break;
