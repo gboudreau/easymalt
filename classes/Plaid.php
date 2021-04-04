@@ -101,7 +101,7 @@ class Plaid
                 } else {
                     $accounts[$plaid_id] = $account_local;
 
-                    $q = "UPDATE accounts SET balance = :balance WHERE id = :id";
+                    $q = "UPDATE accounts SET balance = :balance, balance_date = NOW() WHERE id = :id";
                     DB::execute($q, ['id' => $account_local->id, 'balance' => $balance]);
                 }
             }
