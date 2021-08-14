@@ -65,6 +65,12 @@ table tr.hidden, table tr.hidden a {
 table tr.hidden td {
     border-bottom: 1px solid lightgrey;
 }
+table tr.hidden.netlift, table tr.hidden.netlift a {
+    color: #88c6da;
+}
+table tr.netlift td {
+    border-bottom: 1px solid #88c6da;
+}
 
 table.with_pie_chart {
     float: left;
@@ -189,6 +195,16 @@ body.dark {
 .dark table tr.hidden, .dark table tr.hidden a {
     color: #666;
     background-color: #444 !important;
+}
+.dark table tr.hidden td {
+    border-bottom: 1px solid #666;
+}
+.dark table tr.hidden.netlift, .dark table tr.hidden.netlift a {
+    color: #1a7a96;
+    background-color: #394c52 !important;
+}
+.dark table tr.netlift td {
+    border-bottom: 1px solid #1a7a96;
 }
 .dark .apply_to_all {
     background-color: #444;

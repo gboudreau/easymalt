@@ -19,6 +19,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     echo "[R] Importing accounts ... \n";
     foreach ($json->accounts as $account) {
+        $q = "SELECT 1 FROM accounts WHERE routing_number = :routing_number AND account_number = -:account_number";
+        $is_deleted = DB::getFirstValue($q, ['routing_number' => $account->routing_number, 'account_number' => $account->account_number]);
+        if ($is_deleted) {
+            continue;
+        }
+
         $q = "INSERT INTO accounts 
                  SET routing_number = :routing_number, account_number = :account_number, balance = :balance, currency = :currency, balance_date = :balance_date 
                   ON DUPLICATE KEY UPDATE balance = VALUES(balance), balance_date = VALUES(balance_date)";

@@ -31,7 +31,7 @@ $totals = [];
         <th></th>
     </tr>
     <?php foreach ($data as $row) : ?>
-        <?php $totals[$row->currency] += $row->balance; ?>
+        <?php @$totals[$row->currency] += $row->balance; ?>
         <tr class="<?php echo (($even=!@$even) ? 'even' : 'odd') ?>">
             <td class="name">
                 <a href="/search?q=<?php echo urlencode("account=$row->name") ?>"><?php phe($row->name) ?></a>

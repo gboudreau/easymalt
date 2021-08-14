@@ -1,6 +1,7 @@
 <?php
 namespace EasyMalt;
 chdir(__DIR__);
+
 require 'init.inc.php';
 
 if (!empty($_POST['do_search'])) {
@@ -48,6 +49,7 @@ if (!empty($_POST['do_search'])) {
 <div style="text-align: center">
     Go to:
     <a href="accounts/">Accounts</a>
+    | <a href="txn/?id=new">New Transaction</a>
     <?php if (Config::get('EXTRA_PAGES')) : ?>
         <?php foreach (Config::get('EXTRA_PAGES') as $url => $page_name) : ?>
             | <a href="<?php echo $url ?>"><?php phe($page_name) ?></a>
@@ -332,10 +334,10 @@ $sections = [
     <?php
     $builder_s = clone $builder;
 
-    $builder_s->select("SUM(amount) AS amount, IFNULL(a.currency, 'CAD') AS currency")
+    $builder_s->select("SUM(amount) AS amount, IFNULL(a.currency, 'CAD') AS currency, t.hidden")
         ->from("v_transactions_reports", 't')
         ->leftJoin("accounts a", 'a.id = t.account_id')
-        ->where('t.hidden', 'no')
+        //->where('t.hidden', 'no')
         ->where($select['where'])
         ->groupBy('currency')
         ->orderBy($select['order_by']);
@@ -361,8 +363,23 @@ $sections = [
             <th>Spending</th>
         </tr>
         <?php foreach ($data as $row) : ?>
-            <?php @$total[$row->currency] += $row->amount; ?>
-            <tr class="<?php echo $what . " " . (($even=!@$even) ? 'even' : 'odd') . ($row->category == NULL ? ' uncategorized' : '') ?>">
+            <?php
+            if ($row->hidden == 'no') {
+                @$total[$row->currency] += $row->amount;
+            }
+            $classes = [$what];
+            $classes[] = $even =! @$even ? 'even' : 'odd';
+            if ($row->category == NULL) {
+                $classes[] = 'uncategorized';
+            }
+            if ($row->hidden == 'yes') {
+                $classes[] = 'hidden';
+            }
+            if ($row->category == 'Netlift') {
+                $classes[] = 'netlift';
+            }
+            ?>
+            <tr class="<?php echo implode(' ', $classes) ?>">
                 <?php if ($row->category == NULL) { $row->category = NO_CATEGORY_NAME; } ?>
                 <td><a href="<?php echo getCurrentUrlReplacing('category', $row->category) ?>"><?php phe($row->category) ?></a></td>
                 <td style="text-align: right">
@@ -395,6 +412,7 @@ $sections = [
             <?php
             $js_data = [['Category', 'Spending']];
             foreach ($data as $row) {
+                if ($row->hidden == 'yes') continue;
                 $js_data[] = [$row->category, abs($row->amount)];
             }
             ?>
@@ -480,8 +498,17 @@ function printTransactionsTable($data, $what) {
                     $row->memo = str_replace($re[0][$i], 'Ref: <a href="/txn/?id='. $re[1][$i].'" onclick="return editTxn(this)">#'. $re[1][$i].'</a>', $row->memo);
                 }
             }
+            $classes = [];
+            $classes[] = $row->amount >= 0 ? 'Income' : 'Expenses';
+            $classes[] = $even =! $even ? 'even' : 'odd';
+            if (@$row->hidden == 'yes') {
+                $classes[] = 'hidden';
+            }
+            if ($row->category == 'Netlift') {
+                $classes[] = 'netlift';
+            }
             ?>
-            <tr class="<?php echo ($row->amount >= 0 ? 'Income' : 'Expenses') . " " . (($even=!$even) ? 'even' : 'odd') . " " . (@$row->hidden == 'yes' ? 'hidden' : '') ?>">
+            <tr class="<?php echo implode(' ', $classes) ?>">
                 <td class="date first"><?php echo substr($row->date, 0, 10) ?></td>
                 <td class="name">
                     <?php phe($row->name) ?><br/>

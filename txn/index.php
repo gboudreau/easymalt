@@ -3,30 +3,64 @@ namespace EasyMalt;
 chdir(__DIR__.'/..');
 require 'init.inc.php';
 
-$default_currency = \EasyMalt\Config::get('DEFAULT_CURRENCY');
+$default_currency = Config::get('DEFAULT_CURRENCY');
 $default_currency_name = array_keys($default_currency)[0];
 
-$q = "SELECT t.*, IFNULL(a.currency, :default_currency) AS currency FROM transactions t LEFT JOIN accounts a ON (t.account_id = a.id) WHERE t.id = :id";
-$txn = DB::getFirst($q, ['id' => (int) @$_REQUEST['id'], 'default_currency' => $default_currency_name]);
-if (empty($txn->tags)) {
-    $txn->tags = [];
-} else {
-    $txn->tags = explode(',', $txn->tags);
-}
-if ($txn->display_name === NULL) {
-    $txn->display_name = '';
-}
-if ($txn->category === NULL) {
-    $txn->category = '';
+if (empty($_GET['scrollPos'])) {
+    $_GET['scrollPos'] = 0;
 }
 
-if (empty($txn)) {
-    die("Transaction (ID " . @$_REQUEST['id'] . ") not found.");
+if (!empty($_REQUEST['id']) && $_REQUEST['id'] != 'new') {
+    $q = "SELECT t.*, IFNULL(a.currency, :default_currency) AS currency FROM transactions t LEFT JOIN accounts a ON (t.account_id = a.id) WHERE t.id = :id";
+    $txn = DB::getFirst($q, ['id' => (int) @$_REQUEST['id'], 'default_currency' => $default_currency_name]);
+
+    if (empty($txn->tags)) {
+        $txn->tags = [];
+    } else {
+        $txn->tags = explode(',', $txn->tags);
+    }
+    if ($txn->display_name === NULL) {
+        $txn->display_name = '';
+    }
+    if ($txn->category === NULL) {
+        $txn->category = '';
+    }
+
+    if (empty($txn)) {
+        die("Transaction (ID " . @$_REQUEST['id'] . ") not found.");
+    }
+} else {
+    $txn = (object) [
+        'id' => 'new',
+        'name' => '',
+        'display_name' => '',
+        'memo' => '',
+        'date' => date('Y-m-d'),
+        'amount' => NULL,
+        'category' => '',
+        'tags' => [],
+    ];
 }
 
 if (isset($_POST['id'])) {
-    $params = ['id' => (int) $_POST['id']];
-    $updates = ["post_processed = 'yes'"];
+    $updates = [];
+    $params = [];
+
+    $updates[] = "post_processed = 'yes'";
+
+    if ($_POST['id'] == 'new') {
+        $updates[] = 'account_id = :account_id';
+        $params['account_id'] = $_POST['account_id'];
+        $updates[] = 'amount = :amount';
+        $params['amount'] = $_POST['amount'];
+        $updates[] = 'type = :type';
+        $params['type'] = $_POST['amount'] < 0 ? 'DEBIT' : 'CREDIT';
+
+        $q = "SELECT MAX(CAST(SUBSTRING(unique_id, 8) AS INT)) FROM transactions WHERE account_id = :account_id AND unique_id LIKE 'manual-%'";
+        $max_unique_id = (int) DB::getFirstValue($q, $_POST['account_id']);
+        $updates[] = 'unique_id = :unique_id';
+        $params['unique_id'] = "manual-" . ($max_unique_id + 1);
+    }
 
     if (isset($_POST['display_name'])) {
         $updates[] = 'display_name = :display_name';
@@ -51,8 +85,18 @@ if (isset($_POST['id'])) {
     $updates[] = 'tags = :tags';
     $params['tags'] = empty($_POST['tags']) ? NULL : implode(',', $_POST['tags']);
 
-    $q = "UPDATE transactions SET " . implode(', ', $updates) . " WHERE id = :id";
+    if ($_POST['id'] == 'new') {
+        $q = "INSERT INTO transactions SET " . implode(', ', $updates);
+    } else {
+        $q = "UPDATE transactions SET " . implode(', ', $updates) . " WHERE id = :id";
+        $params['id'] = (int) $_POST['id'];
+    }
     DB::execute($q, $params);
+
+    if ($_POST['id'] == 'new') {
+        $q = "UPDATE accounts SET balance = balance + :amount, balance_date = NOW() WHERE id = :account_id";
+        DB::execute($q, ['account_id' => $_POST['account_id'], 'amount' => $_POST['amount']]);
+    }
 
     if (!empty($_POST['amounts'])) {
         $q = "SELECT unique_id FROM transactions WHERE id = :id";
@@ -154,11 +198,28 @@ $goto_link = $_SESSION['previous_page'] . (string_contains($_SESSION['previous_p
     <input type="hidden" name="id" value="<?php phe($txn->id) ?>" />
     <input type="hidden" name="goto" value="<?php phe($goto_link) ?>" />
     <table>
-        <tr>
-            <td>
-                ID: <?php phe($txn->id) ?>
-            </td>
-        </tr>
+        <?php if ($txn->id == 'new') : ?>
+            <tr>
+                <td>
+                    Account:<br/>
+                    <?php
+                    $q = "SELECT id, name FROM accounts ORDER by name";
+                    $accounts = DB::getAll($q);
+                    ?>
+                    <select name="account_id">
+                        <?php foreach ($accounts as $account) : ?>
+                            <option value="<?php phe($account->id) ?>"><?php phe($account->name) ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </td>
+            </tr>
+        <?php else : ?>
+            <tr>
+                <td>
+                    ID: <?php phe($txn->id) ?>
+                </td>
+            </tr>
+        <?php endif; ?>
         <tr>
             <td>
                 <input type="date" name="date" id="date" value="<?php phe(substr($txn->date, 0, 10)) ?>" />
@@ -166,10 +227,16 @@ $goto_link = $_SESSION['previous_page'] . (string_contains($_SESSION['previous_p
         </tr>
         <tr>
             <td>
-                Amount: <?php echo_amount($txn->amount, $txn->currency) ?> [<a href="#split" onclick="splitTxn(this)">split</a>]
-                <input type="hidden" id="amount" value="<?php phe($txn->amount) ?>" />
-                <div class="split_amount">
-                </div>
+                Amount:
+                <?php if ($txn->amount !== NULL) : ?>
+                    <?php echo_amount($txn->amount, $txn->currency) ?> [<a href="#split" onclick="splitTxn(this)">split</a>]
+                    <input type="hidden" id="amount" value="<?php phe($txn->amount) ?>" />
+                    <div class="split_amount">
+                    </div>
+                <?php else : ?>
+                    <br/>
+                    <input type="number" name="amount" value="" step="0.01" style="width: 100px;" />
+                <?php endif; ?>
             </td>
         </tr>
         <tr>
