@@ -19,10 +19,22 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     echo "[R] Importing accounts ... \n";
     foreach ($json->accounts as $account) {
-        $q = "SELECT 1 FROM accounts WHERE routing_number = :routing_number AND account_number = -:account_number";
+        $q = "SELECT 1 FROM accounts WHERE routing_number = :routing_number AND account_number = CONCAT('-', :account_number)";
         $is_deleted = DB::getFirstValue($q, ['routing_number' => $account->routing_number, 'account_number' => $account->account_number]);
         if ($is_deleted) {
             continue;
+        }
+
+        if ($account->routing_number == 'questrade') {
+            if ($account->account_number == '30103780') {
+                $account->account_number = '7';
+            }
+            if ($account->account_number == '30104231') {
+                $account->account_number = '8';
+            }
+            if ($account->account_number == '30104232') {
+                $account->account_number = '9';
+            }
         }
 
         $q = "INSERT INTO accounts 
