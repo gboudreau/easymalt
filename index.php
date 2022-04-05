@@ -507,6 +507,34 @@ function printTransactionsTable($data, $what) {
             if ($row->category == 'Netlift') {
                 $classes[] = 'netlift';
             }
+
+            // Add consumption & $/km stats
+            if ($row->category == 'Auto: Fuel' && $row->amount < 0) {
+                $tags = array_remove(explode(',', $row->tags), 'Vacation');
+
+                $q = "SELECT memo FROM transactions WHERE tags LIKE :like_tags AND category = 'Auto: Fuel' AND date < :date AND amount < 0 ORDER BY date DESC LIMIT 1";
+                $last_memo = DB::getFirstValue($q, ['date' => $row->date, 'like_tags' => '%' . implode(',', $tags) . '%']);
+
+                $fct_extract_stats = function ($memo) {
+                    $liters = 0;
+                    $km = 0;
+                    if (preg_match('/ x ([\d.]+) ?L/m', $memo, $re)) {
+                        $liters = (float) $re[1];
+                    }
+                    if (preg_match('/^(\d+) ?km/m', $memo, $re)) {
+                        $km = (int) $re[1];
+                    }
+                    return [$liters, $km];
+                };
+                [$liters, $km] = $fct_extract_stats($row->memo);
+                [,   $km_last] = $fct_extract_stats($last_memo);
+                if ($liters > 0 && $km > 0 && $km_last > 0) {
+                    $distance = $km - $km_last;
+                    $consumption = round($liters / $distance * 100, 1);
+                    $price_per_km = round(abs($row->amount) / $distance * 100, 1);
+                    $row->memo .= "\n<em>$consumption L/100km</em> &nbsp;|&nbsp; <em>$price_per_km ¢/km</em>";
+                }
+            }
             ?>
             <tr class="<?php echo implode(' ', $classes) ?>">
                 <td class="date first"><?php echo substr($row->date, 0, 10) ?></td>
