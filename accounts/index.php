@@ -19,9 +19,9 @@ $totals = [];
     &lt; <a href="<?php phe($_SESSION['previous_page']) ?>">Back</a>
 </div>
 
-<div style="margin-top: 1em; margin-bottom: 1em">
+<!--div style="margin-top: 1em; margin-bottom: 1em">
     [<a href="/link/">Add bank account using Plaid</a>]
-</div>
+</div-->
 
 <table class="accounts" cellspacing="0">
     <tr>

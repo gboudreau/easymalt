@@ -125,9 +125,9 @@ $transactions = DB::getAll($q, $params);
 <script>
     var scrollPosition = 0;
     $(function() {
-        scrollPosition = $(document).scrollTop();
+        scrollPosition = Math.round($(document).scrollTop());
         $(window).scroll(function() {
-            scrollPosition = $(document).scrollTop();
+            scrollPosition = Math.round($(document).scrollTop());
             history.replaceState(null, '', '/taxes/?year=<?php echo $year ?>&scrollPos='+scrollPosition);
         });
         <?php if (!empty($_GET['scrollPos'])) : ?>

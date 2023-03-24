@@ -457,128 +457,6 @@ if (empty($data)) {
 } else {
     printTransactionsTable($data, 'Transactions Details');
 }
-
-// Calculate a generic 'current URL' to be used for category & account links, in tables and charts
-function getCurrentUrlReplacing($replace_what, $with_that) {
-    $query_no_cat = explode(' AND ', @$_GET['q']);
-    foreach ($query_no_cat as $k => $q) {
-        if (stripos($q, $replace_what) === 0) {
-            unset($query_no_cat[$k]);
-        }
-    }
-    $query_no_cat[] = $replace_what . " = " . $with_that;
-    return './?q=' . urlencode(implode(' AND ', $query_no_cat));
-}
-
-function printTransactionsTable($data, $what) {
-    $total = [];
-    $even = FALSE;
-    ?>
-    <h3><?php phe($what) ?></h3>
-    <table class="txn_details" cellspacing="0">
-        <tr>
-            <th>Date</th>
-            <th>Description</th>
-            <th>Category</th>
-            <th>Amount</th>
-            <th>Account</th>
-            <th>&nbsp;</th>
-        </tr>
-        <?php foreach ($data as $row) : ?>
-            <?php
-            if (@$row->hidden != 'yes') {
-                @$total[$row->currency] += $row->amount;
-            }
-            if ($row->category === NULL) {
-                $row->category = NO_CATEGORY_NAME;
-            }
-            $row->memo = he($row->memo);
-            if (preg_match_all('/Ref: #(\d+)/', $row->memo, $re)) {
-                for ($i=0; $i<count($re[0]); $i++) {
-                    $row->memo = str_replace($re[0][$i], 'Ref: <a href="/txn/?id='. $re[1][$i].'" onclick="return editTxn(this)">#'. $re[1][$i].'</a>', $row->memo);
-                }
-            }
-            $classes = [];
-            $classes[] = $row->amount >= 0 ? 'Income' : 'Expenses';
-            $classes[] = $even =! $even ? 'even' : 'odd';
-            if (@$row->hidden == 'yes') {
-                $classes[] = 'hidden';
-            }
-            if ($row->category == 'Netlift') {
-                $classes[] = 'netlift';
-            }
-
-            // Add consumption & $/km stats
-            if ($row->category == 'Auto: Fuel' && $row->amount < 0) {
-                $tags = array_remove(explode(',', $row->tags), 'Vacation');
-
-                $q = "SELECT memo FROM transactions WHERE tags LIKE :like_tags AND category = 'Auto: Fuel' AND date < :date AND amount < 0 ORDER BY date DESC LIMIT 1";
-                $last_memo = DB::getFirstValue($q, ['date' => $row->date, 'like_tags' => '%' . implode(',', $tags) . '%']);
-
-                $fct_extract_stats = function ($memo) {
-                    $liters = 0;
-                    $km = 0;
-                    if (preg_match('/ x ([\d.]+) ?L/m', $memo, $re)) {
-                        $liters = (float) $re[1];
-                    }
-                    if (preg_match('/^(\d+) ?km/m', $memo, $re)) {
-                        $km = (int) $re[1];
-                    }
-                    return [$liters, $km];
-                };
-                [$liters, $km] = $fct_extract_stats($row->memo);
-                [,   $km_last] = $fct_extract_stats($last_memo);
-                if ($liters > 0 && $km > 0 && $km_last > 0) {
-                    $distance = $km - $km_last;
-                    $consumption = round($liters / $distance * 100, 1);
-                    $price_per_km = round(abs($row->amount) / $distance * 100, 1);
-                    $row->memo .= "\n<em>$consumption L/100km</em> &nbsp;|&nbsp; <em>$price_per_km ¢/km</em>";
-                }
-            }
-            ?>
-            <tr class="<?php echo implode(' ', $classes) ?>">
-                <td class="date first"><?php echo substr($row->date, 0, 10) ?></td>
-                <td class="name">
-                    <?php phe($row->name) ?><br/>
-                    <small><?php echo nl2br($row->memo) ?></small>
-                </td>
-                <td class="category">
-                    <a href="<?php echo getCurrentUrlReplacing('category', $row->category) ?>"><?php phe($row->category) ?></a>
-                    <br/><small><?php echo nl2br(he($row->tags)) ?></small>
-                </td>
-                <td class="amount">
-                    <?php echo_amount($row->amount, $row->currency) ?>
-                </td>
-                <td class="account">
-                    <a href="<?php echo getCurrentUrlReplacing('account', $row->account) ?>"><?php phe($row->account) ?></a>
-                </td>
-                <td>[<a href="/txn/?id=<?php echo $row->id ?>" onclick="return editTxn(this)">edit</a>]</td>
-            </tr>
-        <?php endforeach; ?>
-        <tr class="total <?php echo $what ?>">
-            <th>&nbsp;</th>
-            <th>&nbsp;</th>
-            <th>Total</th>
-            <th style="text-align: right">
-                <?php
-                foreach ($total as $currency => $tot) {
-                    if ($tot == 0 && !is_default_currency($currency)) {
-                        continue;
-                    }
-                    if (!is_default_currency($currency)) {
-                        echo "+&nbsp;";
-                    };
-                    echo_amount($tot, $currency);
-                    echo '<br/>';
-                }
-                ?>
-            </th>
-            <th>&nbsp;</th>
-            <th>&nbsp;</th>
-        </tr>
-    </table>
-    <?php
-}
 ?>
 
 <script src="https://code.jquery.com/jquery-3.1.1.min.js"
@@ -588,9 +466,9 @@ function printTransactionsTable($data, $what) {
 <script>
     var scrollPosition = 0;
     $(function() {
-        scrollPosition = $(document).scrollTop();
+        scrollPosition = Math.round($(document).scrollTop());
         $(window).scroll(function() {
-            scrollPosition = $(document).scrollTop();
+            scrollPosition = Math.round($(document).scrollTop());
             history.replaceState(null, '', <?php $get = $_GET; unset($get['scrollPos']); echo json_encode('/?' . http_build_query($get) . '&scrollPos=') ?>+scrollPosition);
         });
         <?php if (!empty($_GET['scrollPos'])) : ?>
