@@ -63,12 +63,15 @@ $builder = new DBQueryBuilder();
 $query = explode(' AND ', @$_GET['q']);
 $query_values = [];
 foreach ($query as $k => $q) {
-    if (preg_match('/(category|desc|amount|tag|date|account|ids)\s?([=><]{1,2})\s?(.*)\s?/', $q, $matches)) {
+    if (preg_match('/(category|desc|amount|tag|date|account|ids|show_all_cats)\s?([=><]{1,2})\s?(.*)\s?/', $q, $matches)) {
         $query_type = strtolower($matches[1]);
         $operator = $matches[2];
         $value = trim($matches[3]);
         if (empty($value)) {
             continue;
+        }
+        if ($query_type == 'show_all_cats') {
+            $query_values['show_all_cats'] = (bool) $value;
         }
         if ($query_type == 'ids') {
             $query_values['ids'] = $value;
@@ -281,12 +284,18 @@ $ops_avail = ['=', '<', '<=', '>', '>='];
                 </select>
             </td>
         </tr>
+        <tr class="table-row-show_all_cats" style="display: <?php echo_if(!empty($query_values['show_all_cats']), 'table-row', 'none') ?>">
+            <td>Show all categories?</td>
+            <td>
+                <input name="show_all_cats" type="checkbox" value="1" <?php echo_if(@$query_values['show_all_cats'], 'checked') ?> />
+            </td>
+        </tr>
         <tr>
             <td>Add parameter</td>
             <td>
                 |
                 <?php
-                $params_avail = ['date' => 2, 'category' => 1, 'desc' => 1, 'amount' => 2, 'tag' => 1, 'account' => 1];
+                $params_avail = ['date' => 2, 'category' => 1, 'desc' => 1, 'amount' => 2, 'tag' => 1, 'account' => 1, 'show_all_cats' => 1];
                 foreach ($params_avail as $param => $num_max) {
                     if ($num_max > 1) {
                         $show = count($query_values[$param]) < 2 || @$query_values[$param][''] === '';
@@ -304,6 +313,10 @@ $ops_avail = ['=', '<', '<=', '>', '>='];
                         event.preventDefault();
                         $('.table-row-' + el_class).show();
                         $(link).hide();
+                        if (el_class === 'show_all_cats') {
+                            $('[name=show_all_cats]').prop('checked', true);
+                            $('[name=show_all_cats]').closest('form')[0].submit();
+                        }
                     }
                 </script>
             </td>
@@ -342,7 +355,7 @@ $sections = [
         ->groupBy('currency')
         ->orderBy($select['order_by']);
 
-    if (!empty($query_values['category'])) {
+    if (!empty($query_values['category']) || !empty($query_values['show_all_cats'])) {
         $builder_s->select('category')->groupBy('category');
     } else {
         $builder_s->select('group_by_category AS category')->groupBy('group_by_category');
