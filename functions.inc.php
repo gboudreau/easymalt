@@ -287,7 +287,14 @@ function printTransactionsTable($data, $what) {
 
             // Add consumption & $/km stats
             if ($row->category == 'Auto: Fuel' && $row->amount < 0) {
-                $tags = array_remove(explode(',', $row->tags), 'Vacation');
+                // Find the car tag (Pacifica, IONIQ, etc.)
+                $tags = [];
+                foreach (explode(',', $row->tags) as $t) {
+                    if ($t == 'Vacation') continue;
+                    if (string_contains($t, ' ')) continue;
+                    $tags[] = $t;
+                    break;
+                }
 
                 $q = "SELECT memo FROM transactions WHERE tags LIKE :like_tags AND category = 'Auto: Fuel' AND date < :date AND amount < 0 ORDER BY date DESC LIMIT 1";
                 $last_memo = DB::getFirstValue($q, ['date' => $row->date, 'like_tags' => '%' . implode(',', $tags) . '%']);
