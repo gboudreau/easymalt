@@ -42,7 +42,11 @@ if (!empty($_REQUEST['id']) && $_REQUEST['id'] != 'new') {
     ];
 }
 
-if (isset($_POST['id'])) {
+if (isset($_POST['postprocess'])) {
+    $q = "SELECT * FROM transactions WHERE id = :id";
+    $t = DB::getFirst($q, $_POST['postprocess']);
+    $post_process_result = postProcessTransaction($t);
+} elseif (isset($_POST['id'])) {
     $updates = [];
     $params = [];
 
@@ -328,6 +332,18 @@ $goto_link = $_SESSION['previous_page'] . (string_contains($_SESSION['previous_p
         </tr>
     </table>
 </form>
+
+<?php /*
+<?= he(@$post_process_result) ?>
+<form class="txn_form" method="post" action="">
+    <input type="hidden" name="postprocess" value="<?php phe($txn->id) ?>" />
+    <table>
+        <tr>
+            <td><input type="submit" name="action" value="Post-Process this txn" /></td>
+        </tr>
+    </table>
+</form> */ ?>
+
 <script
         src="https://code.jquery.com/jquery-3.1.1.min.js"
         integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="

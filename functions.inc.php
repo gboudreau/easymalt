@@ -115,7 +115,7 @@ function echo_amount($amount, $currency = NULL) {
     echo '&nbsp;' . number_format($amount, 2);
 }
 
-function postProcessNewTransactions() {
+function postProcessNewTransactions($id = null) {
     // Copy Questrade transactions to gbnp_investments DB
     $q = "SELECT t.*, a2.id AS investment_account_id FROM transactions t JOIN accounts a ON (a.id = t.account_id) JOIN gbnp_investments.accounts a2 ON (a2.number = a.account_number) WHERE t.post_processed = 'no' AND a.routing_number = 'questrade' ORDER BY id";
     $qt_transactions = DB::getAll($q);
@@ -202,49 +202,78 @@ function postProcessNewTransactions() {
     $q = "SELECT * FROM transactions WHERE post_processed = 'no' ORDER BY id";
     $transactions = DB::getAll($q);
     foreach ($transactions as $t) {
-        foreach ($pp_settings as $pp) {
-            if (preg_match('@' . $pp->regex . '@i', $t->name . ' ' . $t->memo, $re) && (empty($pp->amount_equals) || $pp->amount_equals == $t->amount)) {
-                $params = ['txn_id' => (int) $t->id];
-                $updates = [];
-                $log_details = [];
-                if (!empty($pp->display_name)) {
-                    $updates[] = 'display_name = :display_name';
-                    $display_name = $pp->display_name;
-                    for ($i=1; $i<count($re); $i++) {
-                        $display_name = str_replace('{'.$i.'}', $re[$i], $display_name);
-                    }
-                    $params['display_name'] = $display_name;
-                    $log_details[] = "Name: $display_name";
-                }
-                if ($pp->memo !== NULL) {
-                    $updates[] = 'memo = :memo';
-                    $memo = $pp->memo;
-                    for ($i=1; $i<count($re); $i++) {
-                        $memo = str_replace('{'.$i.'}', $re[$i], $memo);
-                    }
-                    $params['memo'] = $memo;
-                    $log_details[] = "Memo: $memo";
-                }
-                if (!empty($pp->category)) {
-                    $updates[] = 'category = :category';
-                    $params['category'] = $pp->category;
-                    $log_details[] = "Category: $pp->category";
-                }
-                if (!empty($pp->tags)) {
-                    $updates[] = 'tags = :tags';
-                    $params['tags'] = $pp->tags;
-                    $log_details[] = "Tags: $pp->tags";
-                }
-                if (!empty($updates)) {
-                    echo "  $t->name => " . implode("  ", $log_details) . "\n";
-                    $updates[] = "post_processed = 'yes'";
-                    $q = "UPDATE transactions SET " . implode(", ", $updates) . " WHERE id = :txn_id";
-                    DB::execute($q, $params);
-                    break;
-                }
-            }
+        $result = postProcessTransaction($t, $pp_settings);
+        if ($result) {
+            echo "$result\n";
         }
     }
+}
+
+function postProcessTransaction($t, $pp_settings = NULL) {
+    $result = FALSE;
+
+    if ($pp_settings === NULL) {
+        $q = "SELECT * FROM post_processing ORDER BY prio DESC";
+        $pp_settings = DB::getAll($q);
+    }
+
+    foreach ($pp_settings as $pp) {
+        $regex_pattern_matches = preg_match('@' . $pp->regex . '@i', $t->name . ' ' . $t->memo, $re);
+        if (!$regex_pattern_matches) {
+            // Pattern doesn't match
+            continue;
+        }
+
+        if (!empty($pp->amount_equals) && round($pp->amount_equals*100) != round($t->amount*100)) {
+            // Amount doesn't match
+            continue;
+        }
+
+        $params = ['txn_id' => (int) $t->id];
+        $updates = [];
+        $log_details = [];
+
+        if (!empty($pp->display_name)) {
+            $updates[] = 'display_name = :display_name';
+            $display_name = $pp->display_name;
+            for ($i=1; $i<count($re); $i++) {
+                $display_name = str_replace('{'.$i.'}', $re[$i], $display_name);
+            }
+            $params['display_name'] = $display_name;
+            $log_details[] = "Name: $display_name";
+        }
+        if ($pp->memo !== NULL) {
+            $updates[] = 'memo = :memo';
+            $memo = $pp->memo;
+            for ($i=1; $i<count($re); $i++) {
+                $memo = str_replace('{'.$i.'}', $re[$i], $memo);
+            }
+            $params['memo'] = $memo;
+            $log_details[] = "Memo: $memo";
+        }
+        if (!empty($pp->category)) {
+            $updates[] = 'category = :category';
+            $params['category'] = $pp->category;
+            $log_details[] = "Category: $pp->category";
+        }
+        if (!empty($pp->tags)) {
+            $updates[] = 'tags = :tags';
+            $params['tags'] = $pp->tags;
+            $log_details[] = "Tags: $pp->tags";
+        }
+
+        if (!empty($updates)) {
+            $result = "  $t->name => " . implode("  ", $log_details);
+
+            $updates[] = "post_processed = 'yes'";
+            $q = "UPDATE transactions SET " . implode(", ", $updates) . " WHERE id = :txn_id";
+            DB::execute($q, $params);
+
+            break;
+        }
+    }
+
+    return $result;
 }
 
 function printTransactionsTable($data, $what) {
