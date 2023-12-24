@@ -290,7 +290,7 @@ $goto_link = $_SESSION['previous_page'] . (string_contains($_SESSION['previous_p
                        AND
                        amount is equal to
                        <input type="text" name="post_processing_rule_amount_equals" value="" style="width: 50px; text-align: center" />
-                       (leave empty to NOT match against amount)
+                       (use a negative number for payments; leave empty to NOT match against amount)
                    </div>
                    <ul>
                        <li class="desc">
