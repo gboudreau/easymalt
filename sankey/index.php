@@ -5,7 +5,7 @@ require 'init.inc.php';
 
 $year_selected = (int) $_GET['year'];
 
-$q = "SELECT t.category, ROUND(t.amount) AS amount, t.id, t.date, t.name, t.memo, t.tags, t.hidden, a.currency, a.name AS account
+$q = "SELECT t.category, ROUND(t.amount) AS amount, t.id, t.date, IFNULL(t.display_name, t.name) AS name, t.memo, t.tags, t.hidden, a.currency, a.name AS account
         FROM transactions t
         LEFT JOIN accounts a ON (a.id = t.account_id)
        WHERE t.date BETWEEN '$year_selected-01-01' AND '" . ($year_selected+1) . "-01-01'
@@ -35,6 +35,10 @@ foreach ($transactions as $txn) {
     } else {
         $from = 'Budget';
         $cats = [];
+        if ($txn->category == 'Kids: School: Tuition Savings Plan') {
+            $txn->category = 'Investing: Tuition Savings Plan';
+            $tuition_savings_plan += $txn->amount;
+        }
         foreach (explode(': ', $txn->category) as $cat) {
             $cats[] = $cat;
             $to = implode(': ', $cats);
@@ -72,12 +76,13 @@ foreach ($expenses as $from => $data_to) {
                 $amount += $diff_investing;
             }
             $datas[] = ['from' => 'Budget', 'to' => 'Investing', 'flow' => -$amount];
-            $labels["Investing"] = "Investing - " . number_format(round(-$amount)) . '$';
+            $labels["Investing"] = "Investing - " . number_format(round(-$amount - ($tuition_savings_plan ?? 0))) . '$';
             continue;
         }
-        if ($from == 'Kids: School') {
-            continue;
-        }
+        // Example of how to NOT display the details of sub-categories
+        //if ($from == 'Kids: School') {
+        //    continue;
+        //}
         if (abs($amount) < 300) {
             continue;
         }
@@ -134,6 +139,7 @@ foreach ($expenses as $from => $data_to) {
             'Investing':     'purple',
             'Auto':          'turquoise',
             'Music':         'orange',
+            'Travel':        'green',
         };
 
         const getColor = function (key) {
@@ -152,11 +158,11 @@ foreach ($expenses as $from => $data_to) {
             type: 'sankey',
             data: {
                 datasets: [{
-                    label: 'My sankey',
                     data: <?php echo json_encode($datas) ?>,
                     colorFrom: (c) => getColor(c.dataset.data[c.dataIndex].from),
                     colorTo: (c) => getColor(c.dataset.data[c.dataIndex].to),
-                    colorMode: 'to', // or 'from' or 'to'/* optional labels */
+                    colorMode: 'to', // or 'from' or 'to'
+                    // optional labels
                     labels: <?php echo json_encode($labels) ?>,
                     // priority: {
                     //     'Investing': 0,
