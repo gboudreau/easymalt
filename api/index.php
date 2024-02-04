@@ -55,6 +55,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     echo "[R] Importing transactions ... \n";
     $new_txn_ids = [];
     foreach ($json->transactions as $txn) {
+        if ($txn->name == 'Interest Paid' && abs($txn->amount) < 0.01) {
+            continue;
+        }
+
         $q = "INSERT IGNORE INTO transactions
                  SET account_id = :account_id, unique_id = :unique_id, `date` = :date, `type` = :type, amount = :amount, name = :name, memo = :memo";
         $id = DB::insert(
