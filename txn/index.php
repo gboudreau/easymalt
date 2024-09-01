@@ -11,7 +11,9 @@ if (empty($_GET['scrollPos'])) {
 }
 
 if (!empty($_REQUEST['id']) && $_REQUEST['id'] != 'new') {
-    $q = "SELECT t.*, IFNULL(a.currency, :default_currency) AS currency FROM transactions t LEFT JOIN accounts a ON (t.account_id = a.id) WHERE t.id = :id";
+    $q = "SELECT t.*, IFNULL(a.currency, :default_currency) AS currency, a.name AS account_name 
+            FROM transactions t 
+            LEFT JOIN accounts a ON (t.account_id = a.id) WHERE t.id = :id";
     $txn = DB::getFirst($q, ['id' => (int) @$_REQUEST['id'], 'default_currency' => $default_currency_name]);
 
     if (empty($txn->tags)) {
@@ -241,6 +243,11 @@ $goto_link = $_SESSION['previous_page'] . (string_contains($_SESSION['previous_p
                     <br/>
                     <input type="number" name="amount" value="" step="0.01" style="width: 100px;" />
                 <?php endif; ?>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                Account: <?php phe($txn->account_name) ?>
             </td>
         </tr>
         <tr>
