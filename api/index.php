@@ -84,7 +84,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $url = $_SERVER['REQUEST_SCHEME'] . '://' . $_SERVER['SERVER_NAME'] . '/';
         $q = "ids=" . implode(',', array_unique($new_txn_ids));
         $url = "$url?q=" . urlencode($q);
-        echo "\nReview new transactions here: ";
+        echo "\nReview new transactions here: \n";
         if (@$_REQUEST['format'] == 'html') {
             echo "<a href='$url'>$url</a>";
         } else {
