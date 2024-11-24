@@ -180,7 +180,7 @@ class DBQueryBuilder
      *           $builder->where("table1.col1 = table2.col2")
      *
      * @param string $whereCondition  Where expression
-     * @param array  ...$param_values Optional parameter values, if the where condition contains placeholders
+     * @param mixed  ...$param_values Optional parameter values, if the where condition contains placeholders
      *
      * @return DBQueryBuilder
      *

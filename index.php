@@ -35,7 +35,7 @@ if (!empty($_POST['do_search'])) {
     exit();
 }
 ?>
-<html>
+<html lang="en">
 <head>
     <title>Easy mint Alternative</title>
     <meta name="viewport" content="initial-scale=1.0, user-scalable=no, width=device-width">
@@ -334,11 +334,11 @@ $ops_avail = ['=', '<', '<=', '>', '>='];
 <?php
 $sections = [
     'Expenses' => [
-        'where'    => "amount < 0 OR (amount = 0 AND type = 'DEBIT')",
+        'where'    => "t.amount < 0 OR (t.amount = 0 AND t.type = 'DEBIT')",
         'order_by' => "amount ASC"
     ],
     'Income' => [
-        'where'    => "amount > 0 OR (amount = 0 AND type = 'CREDIT')",
+        'where'    => "t.amount > 0 OR (t.amount = 0 AND t.type = 'CREDIT')",
         'order_by' => "amount DESC"
     ]
 ];
@@ -347,7 +347,7 @@ $sections = [
     <?php
     $builder_s = clone $builder;
 
-    $builder_s->select("SUM(amount) AS amount, IFNULL(a.currency, 'CAD') AS currency, t.hidden")
+    $builder_s->select("SUM(t.amount) AS amount, IFNULL(a.currency, 'CAD') AS currency, t.hidden")
         ->from("v_transactions_reports", 't')
         ->leftJoin("accounts a", 'a.id = t.account_id')
         //->where('t.hidden', 'no')
