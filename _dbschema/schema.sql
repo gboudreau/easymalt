@@ -180,6 +180,7 @@ CREATE VIEW `v_transactions_reports` AS
       SUBSTR(t.category, 1, LENGTH(t.category) - LOCATE(':', REVERSE(t.category))) AS `group_by_category`,
       t.tags AS `tags`,
       IFNULL(t.display_name, t.name) AS `name`,
+      t.name AS `original_name`,
       t.memo AS `memo`,
       t.type AS `type`,
       t.account_id AS `account_id`,

@@ -87,7 +87,7 @@ foreach ($query as $k => $q) {
         }
         if ($query_type == 'desc') {
             $query_values['desc'] = $value;
-            $builder->where("(t.memo LIKE :desc OR t.name LIKE :desc)", '%' . $value .'%');
+            $builder->where("(t.memo LIKE :desc OR t.name LIKE :desc OR t.original_name LIKE :desc)", '%' . $value .'%');
         }
         if ($query_type == 'amount') {
             $query_values['amount'][$operator] = (float) $value;
