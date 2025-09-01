@@ -80,7 +80,7 @@ function sendGET($url, $headers=array()) {
 }
 
 function string_contains($haystack, $needle) {
-    return strpos($haystack, $needle) !== FALSE;
+    return stripos($haystack, $needle) !== FALSE;
 }
 
 function array_contains($haystack, $needle) {
@@ -115,84 +115,89 @@ function echo_amount($amount, $currency = NULL) {
     echo '&nbsp;' . number_format($amount, 2);
 }
 
-function postProcessNewTransactions($id = null) {
-    // Copy Questrade transactions to gbnp_investments DB
-    $q = "SELECT t.*, a2.id AS investment_account_id FROM transactions t JOIN accounts a ON (a.id = t.account_id) JOIN gbnp_investments.accounts a2 ON (a2.number = a.account_number) WHERE t.post_processed = 'no' AND a.routing_number = 'questrade' ORDER BY id";
-    $qt_transactions = DB::getAll($q);
-    foreach ($qt_transactions as $t) {
-        if ($t->type == 'DEP' || $t->type == 'FXT') {
-            $type = 'deposit';
-        } elseif ($t->type == 'DIV') {
-            $type = 'dividends';
-        } elseif ($t->type == 'BUY') {
-            $type = 'buy';
-        } elseif ($t->type == 'SELL') {
-            $type = 'sell';
-        } else {
-            $type = $t->amount < 0 ? 'buy' : 'sell';
-        }
-        if (preg_match('/(\d+) x (.+) @ ([\d.]+) ([CADUSD]+)/', trim($t->memo), $re)) {
-            $qty = (int) $re[1];
-            $symbol = $re[2];
-            $price_per_share = (float) $re[3];
-            //$currency = $re[4];
-        } elseif (preg_match('/^([CADUSD]+)$/', trim($t->memo), $re)) {
-            $qty = 0;
-            $price_per_share = 0;
-            $symbol = $re[1];
-        } elseif (string_contains(trim($t->name), "ISHARES GLOBAL REIT ETF")) {
-            $type = 'dividends';
-            $qty = 0;
-            $price_per_share = 0;
-            $symbol = 'REET';
-        } elseif (string_contains(trim($t->name), "ISHARES CORE MSCI EAFE IMI INDEX ETF")) {
-            $type = 'dividends';
-            $qty = 0;
-            $price_per_share = 0;
-            $symbol = 'XEF.TO';
-        } elseif (string_contains(trim($t->name), "SPDR SERIES TRUST SPDR PORTFOLIO S&P 1500 COMPOSITE STOCK MARKET ETF CASH DIV")) {
-            $type = 'dividends';
-            $qty = 0;
-            $price_per_share = 0;
-            $symbol = 'SPTM';
-        } elseif (string_contains(trim($t->name), "SPDR INDEX SHARES FUNDS SPDR PORTFOLIO EMERGING MARKETS ETF CASH DIV")) {
-            $type = 'dividends';
-            $qty = 0;
-            $price_per_share = 0;
-            $symbol = 'SPEM';
-        } elseif (string_contains(trim($t->name), "BMO S&P/TSX CAPPED COMPOSITE INDEX ETF")) {
-            $type = 'dividends';
-            $qty = 0;
-            $price_per_share = 0;
-            $symbol = 'ZCN.TO';
-        } else {
-            echo "WARNING: unparseable Questwealth transaction\nIn: " . json_encode($t, JSON_PRETTY_PRINT);
-            continue;
-        }
-        $q = "SELECT MAX(id) FROM gbnp_investments.symbols WHERE symbol_yahoo = :symbol";
-        $symbol_id = DB::getFirstValue($q, $symbol);
-        if (empty($symbol_id)) {
-            echo "WARNING: missing symbol in gbnp_investments.symbols: '$symbol'\nIn: " . json_encode($t, JSON_PRETTY_PRINT);
-            continue;
-        }
+function postProcessNewTransactions() {
+    try {
+        // Copy Questrade transactions to gbnp_investments DB
+        $q = "SELECT t.*, a2.id AS investment_account_id FROM transactions t JOIN accounts a ON (a.id = t.account_id) JOIN gbnp_investments.accounts a2 ON (a2.number = a.account_number) WHERE t.post_processed = 'no' AND a.routing_number = 'questrade' ORDER BY id";
+        $qt_transactions = DB::getAll($q);
+        foreach ($qt_transactions as $t) {
+            if ($t->type == 'DEP' || $t->type == 'FXT') {
+                $type = 'deposit';
+            } elseif ($t->type == 'DIV') {
+                $type = 'dividends';
+            } elseif ($t->type == 'BUY') {
+                $type = 'buy';
+            } elseif ($t->type == 'SELL') {
+                $type = 'sell';
+            } else {
+                $type = $t->amount < 0 ? 'buy' : 'sell';
+            }
+            if (preg_match('/(\d+) x (.+) @ ([\d.]+) ([CADUSD]+)/', trim($t->memo), $re)) {
+                $qty = (int) $re[1];
+                $symbol = $re[2];
+                $price_per_share = (float) $re[3];
+                //$currency = $re[4];
+            } elseif (preg_match('/^([CADUSD]+)$/', trim($t->memo), $re)) {
+                $qty = 0;
+                $price_per_share = 0;
+                $symbol = $re[1];
+            } elseif (string_contains(trim($t->name), "ISHARES GLOBAL REIT ETF")) {
+                $type = 'dividends';
+                $qty = 0;
+                $price_per_share = 0;
+                $symbol = 'REET';
+            } elseif (string_contains(trim($t->name), "ISHARES CORE MSCI EAFE IMI INDEX ETF")) {
+                $type = 'dividends';
+                $qty = 0;
+                $price_per_share = 0;
+                $symbol = 'XEF.TO';
+            } elseif (string_contains(trim($t->name), "SPDR SERIES TRUST SPDR PORTFOLIO S&P 1500 COMPOSITE STOCK MARKET ETF CASH DIV")) {
+                $type = 'dividends';
+                $qty = 0;
+                $price_per_share = 0;
+                $symbol = 'SPTM';
+            } elseif (string_contains(trim($t->name), "SPDR INDEX SHARES FUNDS SPDR PORTFOLIO EMERGING MARKETS ETF CASH DIV")) {
+                $type = 'dividends';
+                $qty = 0;
+                $price_per_share = 0;
+                $symbol = 'SPEM';
+            } elseif (string_contains(trim($t->name), "BMO S&P/TSX CAPPED COMPOSITE INDEX ETF")) {
+                $type = 'dividends';
+                $qty = 0;
+                $price_per_share = 0;
+                $symbol = 'ZCN.TO';
+            } else {
+                echo "WARNING: unparseable Questwealth transaction\nIn: " . json_encode($t, JSON_PRETTY_PRINT);
+                continue;
+            }
+            $q = "SELECT MAX(id) FROM gbnp_investments.symbols WHERE symbol_yahoo = :symbol";
+            $symbol_id = DB::getFirstValue($q, $symbol);
+            if (empty($symbol_id)) {
+                echo "WARNING: missing symbol in gbnp_investments.symbols: '$symbol'\nIn: " . json_encode($t, JSON_PRETTY_PRINT);
+                continue;
+            }
 
-        $params = [
-            'account_id'  => $t->investment_account_id,
-            'txn_date'    => substr($t->date, 0, 10),
-            'settle_date' => substr($t->date, 0, 10),
-            'type'        => $type,
-            'symbol_id'   => $symbol_id,
-            'quantity'    => $qty,
-            'price_per_share' => $price_per_share,
-            'amount' => $t->amount,
-        ];
+            $params = [
+                    'account_id'  => $t->investment_account_id,
+                    'txn_date'    => substr($t->date, 0, 10),
+                    'settle_date' => substr($t->date, 0, 10),
+                    'type'        => $type,
+                    'symbol_id'   => $symbol_id,
+                    'quantity'    => $qty,
+                    'price_per_share' => $price_per_share,
+                    'amount' => $t->amount,
+            ];
 
-        $q = "INSERT IGNORE INTO gbnp_investments.transactions SET account_id = :account_id, txn_date = :txn_date, settle_date = :settle_date, type = :type, symbol_id = :symbol_id, 
-                                                     quantity = :quantity, price_per_share = :price_per_share, gross_amount = :amount, net_amount = :amount";
-        $id = DB::insert($q, $params);
-        if ($id) {
-            echo "Importing Questrade transaction: " . implode("\t", (array) $t) . "\n";
+            $q = "INSERT IGNORE INTO gbnp_investments.transactions SET account_id = :account_id, txn_date = :txn_date, settle_date = :settle_date, type = :type, symbol_id = :symbol_id, 
+                                                         quantity = :quantity, price_per_share = :price_per_share, gross_amount = :amount, net_amount = :amount";
+            $id = DB::insert($q, $params);
+            if ($id) {
+                echo "Importing Questrade transaction: " . implode("\t", (array) $t) . "\n";
+            }
         }
+    } catch (Exception $e) {
+        error_log("Error while trying to copy Questrade transactions to gbnp_investments DB.");
+        error_log($e->getMessage());
     }
 
     echo "[PP] Post-processing transactions ... \n";
