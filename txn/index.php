@@ -229,6 +229,13 @@ $goto_link = $_SESSION['previous_page'] . (string_contains($_SESSION['previous_p
         <tr>
             <td>
                 <input type="date" name="date" id="date" value="<?php phe(substr($txn->date, 0, 10)) ?>" />
+                <?php
+                $time = substr($txn->date, 11);
+                if ($time != '00:00:00' && $time != '12:00:00' && $time != '05:00:00' && $time != '04:00:00') {
+                    echo "&nbsp;";
+                    phe($time);
+                }
+                ?>
             </td>
         </tr>
         <tr>
