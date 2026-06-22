@@ -165,7 +165,7 @@ VALUES
 CREATE TABLE `transactions` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `account_id` int(11) unsigned NOT NULL,
-  `unique_id` varchar(100) DEFAULT '',
+  `unique_id` varchar(200) DEFAULT '',
   `date` datetime NOT NULL,
   `type` varchar(20) DEFAULT NULL,
   `amount` float(9,2) NOT NULL,

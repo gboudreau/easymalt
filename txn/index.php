@@ -118,6 +118,7 @@ if (isset($_POST['postprocess'])) {
             $next_available_unique_id++;
         }
 
+        // Split transaction
         for ($i = 1; $i<count($_POST['amounts']); $i++) {
             $amount = (float) $_POST['amounts'][$i];
             $q = "INSERT INTO transactions (account_id, unique_id, `date`, type, amount, display_name, name, memo, tags, category, post_processed) SELECT account_id, CONCAT(unique_id, '-', :unique_id), `date`, type, :amount, display_name, name, memo, tags, category, post_processed FROM transactions WHERE id = :id";
