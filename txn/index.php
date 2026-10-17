@@ -85,7 +85,9 @@ if (isset($_POST['postprocess'])) {
         $params['amount'] = (float) $_POST['amounts'][0];
     }
     if (!empty($_POST['date'])) {
-        $updates[] = 'date = :date';
+        $updates[] = $_POST['id'] == 'new'
+            ? 'date = :date'
+            : 'date = TIMESTAMP(:date, TIME(date))';
         $params['date'] = $_POST['date'];
     }
     $updates[] = 'tags = :tags';
