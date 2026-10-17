@@ -334,8 +334,8 @@ function printTransactionsTable($data, $what) {
                     break;
                 }
 
-                $q = "SELECT memo FROM transactions WHERE tags LIKE :like_tags AND category = 'Auto: Fuel' AND date < :date AND amount < 0 ORDER BY date DESC LIMIT 1";
-                $last_memo = DB::getFirstValue($q, ['date' => $row->date, 'like_tags' => '%' . implode(',', $tags) . '%']);
+                $q = "SELECT memo FROM transactions WHERE tags LIKE :like_tags AND category = 'Auto: Fuel' AND date <= :date AND amount < 0 AND id < :id ORDER BY date DESC, id DESC LIMIT 1";
+                $last_memo = DB::getFirstValue($q, ['id' => $row->id, 'date' => $row->date, 'like_tags' => '%' . implode(',', $tags) . '%']);
 
                 $fct_extract_stats = function ($memo) {
                     $liters = 0;
@@ -355,7 +355,7 @@ function printTransactionsTable($data, $what) {
                     if ($distance > 0) {
                         $consumption = round($liters / $distance * 100, 1);
                         $price_per_km = round(abs($row->amount) / $distance * 100, 1);
-                        $row->memo .= "\n<em>$consumption L/100km</em> &nbsp;|&nbsp; <em>$price_per_km ¢/km</em>";
+                        $row->memo .= "\n<em>Distance: $distance km</em> &nbsp;|&nbsp; <em>$consumption L/100km</em> &nbsp;|&nbsp; <em>$price_per_km ¢/km</em>";
                     }
                 }
             }
