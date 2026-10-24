@@ -16,6 +16,10 @@ if (!empty($_REQUEST['id']) && $_REQUEST['id'] != 'new') {
             LEFT JOIN accounts a ON (t.account_id = a.id) WHERE t.id = :id";
     $txn = DB::getFirst($q, ['id' => (int) @$_REQUEST['id'], 'default_currency' => $default_currency_name]);
 
+    if (empty($txn)) {
+        die("Transaction (ID " . @$_REQUEST['id'] . ") not found.");
+    }
+
     if (empty($txn->tags)) {
         $txn->tags = [];
     } else {
@@ -26,10 +30,6 @@ if (!empty($_REQUEST['id']) && $_REQUEST['id'] != 'new') {
     }
     if ($txn->category === NULL) {
         $txn->category = '';
-    }
-
-    if (empty($txn)) {
-        die("Transaction (ID " . @$_REQUEST['id'] . ") not found.");
     }
 } else {
     $txn = (object) [

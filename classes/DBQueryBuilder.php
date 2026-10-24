@@ -521,8 +521,7 @@ class DBQueryBuilder
      * @see DBQueryBuilder::select() for usage.
      */
     public function getFirst(?string $class_type = NULL) {
-        $options = ( $this->_cached ? DB::GET_OPT_CACHED : 0 );
-        return DB::getFirst($this->build(), $this->getParams(), $options, $class_type);
+        return DB::getFirst($this->build(), $this->getParams(), $class_type);
     }
 
     /**
@@ -533,8 +532,7 @@ class DBQueryBuilder
      * @see DBQueryBuilder::select() for usage.
      */
     public function getFirstValue() {
-        $options = ( $this->_cached ? DB::GET_OPT_CACHED : 0 );
-        return DB::getFirstValue($this->build(), $this->getParams(), $options);
+        return DB::getFirstValue($this->build(), $this->getParams());
     }
 
     /**
@@ -549,9 +547,6 @@ class DBQueryBuilder
      * @see DBQueryBuilder::select() for usage.
      */
     public function getAll(?string $index_field = NULL, int $options = 0, ?string $class_type = NULL) : array {
-        if ($this->_cached) {
-            $options = $options | DB::GET_OPT_CACHED;
-        }
         return DB::getAll($this->build(), $this->getParams(), $index_field, $options, $class_type);
     }
 
@@ -565,8 +560,7 @@ class DBQueryBuilder
      * @see DBQueryBuilder::select() for usage.
      */
     public function getAllValues(?string $data_type = NULL) : array {
-        $options = ( $this->_cached ? DB::GET_OPT_CACHED : 0 );
-        return DB::getAllValues($this->build(), $this->getParams(), $data_type, $options);
+        return DB::getAllValues($this->build(), $this->getParams(), $data_type);
     }
 
     /**
@@ -577,7 +571,7 @@ class DBQueryBuilder
      * @see DBQueryBuilder::exists() for usage.
      */
     public function doExists() : bool {
-        return ( $this->getFirstValue() === '1' );
+        return (bool) $this->getFirstValue();
     }
 
     public function getDebug() {

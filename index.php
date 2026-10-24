@@ -60,7 +60,7 @@ if (!empty($_POST['do_search'])) {
 <?php
 $builder = new DBQueryBuilder();
 
-$query = explode(' AND ', @$_GET['q']);
+$query = explode(' AND ', $_GET['q'] ?? '');
 $query_values = [];
 foreach ($query as $k => $q) {
     if (preg_match('/(category|desc|amount|tag|date|account|ids|show_all_cats)\s?([=><]{1,2})\s?(.*)\s?/', $q, $matches)) {

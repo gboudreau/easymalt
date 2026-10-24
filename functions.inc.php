@@ -8,7 +8,7 @@ function array_remove($array, $value_to_remove) {
 }
 
 function he($text) {
-    return htmlentities($text, ENT_COMPAT|ENT_QUOTES, 'UTF-8');
+    return htmlentities($text ?? '', ENT_COMPAT|ENT_QUOTES, 'UTF-8');
 }
 
 function phe($text) {
@@ -58,8 +58,6 @@ function sendPOST($url, $data, $headers=array()) {
         error_log("Error executing sendPOST$url); cURL error: " . curl_errno($ch));
     }
 
-    curl_close($ch);
-
     return $result;
 }
 
@@ -77,8 +75,6 @@ function sendGET($url, $headers=array()) {
     if (!$result) {
         throw new Exception("Error executing sendGET($url); cURL error: " . curl_errno($ch) . " " . curl_error($ch), curl_errno($ch));
     }
-
-    curl_close($ch);
 
     return $result;
 }
@@ -136,12 +132,12 @@ function postProcessNewTransactions() {
             } else {
                 $type = $t->amount < 0 ? 'buy' : 'sell';
             }
-            if (preg_match('/(\d+) x (.+) @ ([\d.]+) ([CADUSD]+)/', trim($t->memo), $re)) {
+            if (preg_match('/(\d+) x (.+) @ ([\d.]+) ([CADUSD]+)/', trim($t->memo ?? ''), $re)) {
                 $qty = (int) $re[1];
                 $symbol = $re[2];
                 $price_per_share = (float) $re[3];
                 //$currency = $re[4];
-            } elseif (preg_match('/^([CADUSD]+)$/', trim($t->memo), $re)) {
+            } elseif (preg_match('/^([CADUSD]+)$/', trim($t->memo ?? ''), $re)) {
                 $qty = 0;
                 $price_per_share = 0;
                 $symbol = $re[1];
@@ -327,7 +323,7 @@ function printTransactionsTable($data, $what) {
             if ($row->category == 'Auto: Fuel' && $row->amount < 0) {
                 // Find the car tag (Pacifica, IONIQ, etc.)
                 $tags = [];
-                foreach (explode(',', $row->tags) as $t) {
+                foreach (explode(',', $row->tags ?? '') as $t) {
                     if ($t == 'Vacation') continue;
                     if (string_contains($t, ' ')) continue;
                     $tags[] = $t;
@@ -340,10 +336,10 @@ function printTransactionsTable($data, $what) {
                 $fct_extract_stats = function ($memo) {
                     $liters = 0;
                     $km = 0;
-                    if (preg_match('/ x ([\d.]+) ?L/m', $memo, $re)) {
+                    if (preg_match('/ x ([\d.]+) ?L/m', $memo ?? '', $re)) {
                         $liters = (float) $re[1];
                     }
-                    if (preg_match('/^(\d+) ?km/m', $memo, $re)) {
+                    if (preg_match('/^(\d+) ?km/m', $memo ?? '', $re)) {
                         $km = (int) $re[1];
                     }
                     return [$liters, $km];
@@ -406,7 +402,7 @@ function printTransactionsTable($data, $what) {
 
 // Calculate a generic 'current URL' to be used for category & account links, in tables and charts
 function getCurrentUrlReplacing($replace_what, $with_that) {
-    $query_no_cat = explode(' AND ', @$_GET['q']);
+    $query_no_cat = explode(' AND ', $_GET['q'] ?? '');
     foreach ($query_no_cat as $k => $q) {
         if (stripos($q, $replace_what) === 0) {
             unset($query_no_cat[$k]);

@@ -100,9 +100,9 @@ function getAccessTokenFromHttpHeaders() {
         return $_GET['token'];
     } elseif (function_exists('apache_request_headers')) {
         $headers = apache_request_headers();
-        $auth_header = @$headers['Authorization'];
+        $auth_header = $headers['Authorization'] ?? '';
     } else {
-        $auth_header = @$_SERVER['HTTP_AUTHORIZATION'];
+        $auth_header = $_SERVER['HTTP_AUTHORIZATION'] ?? '';
     }
     if (preg_match('/Bearer (.*)/', $auth_header, $regs)) {
         return $regs[1];

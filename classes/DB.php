@@ -28,7 +28,7 @@ class DB
                 \PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION
             );
             if (Config::get('DB_CA_CERT')) {
-                $opt[\PDO::MYSQL_ATTR_SSL_CA] = Config::get('DB_CA_CERT');
+                $opt[\Pdo\Mysql::ATTR_SSL_CA] = Config::get('DB_CA_CERT');
             }
             if (Config::get('DB_PWD')) {
                 static::$handle = new \PDO($connect_string, Config::get('DB_USER'), Config::get('DB_PWD'), $opt);
