@@ -14,7 +14,7 @@ try {
     die($ex->getMessage());
 }
 
-ini_set('error_reporting', E_ALL);
+ini_set('error_reporting', E_ALL & ~E_DEPRECATED);
 
 session_start();
 
