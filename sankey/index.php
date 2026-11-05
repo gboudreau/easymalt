@@ -107,7 +107,7 @@ foreach ($expenses as $from => $data_to) {
     </style>
     <link rel="stylesheet" type="text/css" href="../css/styles.css">
 </head>
-<body class="<?php echo ($is_dark ? 'dark' : '') ?>">
+<body class="<?php echo ($GLOBALS['is_dark'] ? 'dark' : '') ?>">
 
 &lt; <a href="/">Back</a>
 

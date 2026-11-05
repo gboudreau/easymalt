@@ -1,5 +1,7 @@
 <?php
 namespace EasyMalt;
+use Delight\Cookie\Cookie;
+
 chdir(__DIR__);
 
 require 'init.inc.php';
@@ -41,10 +43,10 @@ if (!empty($_POST['do_search'])) {
     <meta name="viewport" content="initial-scale=1.0, user-scalable=no, width=device-width">
     <link rel="stylesheet" type="text/css" href="css/styles.css">
 </head>
-<body class="<?php echo ($is_dark ? 'dark' : '') ?>">
+<body class="<?php echo ($GLOBALS['is_dark'] ? 'dark' : '') ?>">
 
 <div id="dark_switcher">
-    <a href="./?dark=<?php echo ($is_dark ? 0 : 1)?>">Go <?php echo ($is_dark ? 'light' : 'dark')?></a>
+    <a href="./?dark=<?php echo ($GLOBALS['is_dark'] ? 0 : 1)?>">Go <?php echo ($GLOBALS['is_dark'] ? 'light' : 'dark')?></a>
 </div>
 <div style="text-align: center">
     Go to:
@@ -58,6 +60,19 @@ if (!empty($_POST['do_search'])) {
 </div>
 
 <?php
+if (!Cookie::get('ECK1C')) {
+    ?>
+    <h3>Missing ECK1C value in cookies. Find it in 1Password.</h3>
+    <form method="post" action="">
+        <input type="text" name="ECK1C" /><br/><br/>
+        <input type="submit" value="Save" />
+    </form>
+    </body>
+    </html>
+    <?php
+    exit();
+}
+
 $builder = new DBQueryBuilder();
 
 $query = explode(' AND ', $_GET['q'] ?? '');

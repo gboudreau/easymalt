@@ -132,6 +132,7 @@ class DB
         $stmt = DB::execute($q, $args);
         $rows = array();
         $i = 0;
+        /** @noinspection PhpAssignmentInConditionInspection */
         while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
             $index = $i++;
             if (!empty($index_field)) {
@@ -149,6 +150,7 @@ class DB
     public static function getAllValues($q, $args = array(), $data_type=null) {
         $stmt = DB::execute($q, $args);
         $values = array();
+        /** @noinspection PhpAssignmentInConditionInspection */
         while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
             if (!is_array($row)) {
                 return FALSE;
