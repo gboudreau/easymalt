@@ -19,16 +19,11 @@ $totals = [];
     &lt; <a href="<?php phe($_SESSION['previous_page']) ?>">Back</a>
 </div>
 
-<!--div style="margin-top: 1em; margin-bottom: 1em">
-    [<a href="/link/">Add bank account using Plaid</a>]
-</div-->
-
 <table class="accounts" cellspacing="0">
     <tr>
         <th>Account</th>
         <th>Balance</th>
         <th>Last Updated</th>
-        <th></th>
     </tr>
     <?php foreach ($data as $row) : ?>
         <?php @$totals[$row->currency] += $row->balance; ?>
@@ -41,12 +36,6 @@ $totals = [];
             </td>
             <td>
                 <?php echo (empty($row->last_updated) ? 'N/A' : he($row->last_updated)) ?>
-            </td>
-            <td>
-                <?php if (!empty($row->plaid_id)) : ?>
-                    <a href="/link/?account=<?php echo urlencode($row->plaid_id) ?>">Update Plaid link</a> |
-                    <a href="/link/?remove_account=<?php echo urlencode($row->plaid_id) ?>">Remove Plaid link</a>
-                <?php endif; ?>
             </td>
         </tr>
     <?php endforeach; ?>
