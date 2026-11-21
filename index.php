@@ -40,6 +40,8 @@ if (!empty($_POST['do_search'])) {
 
 $view = [
     'is_dark' => $GLOBALS['is_dark'],
+    'theme_url' => './?' . http_build_query(['dark' => $GLOBALS['is_dark'] ? 0 : 1]
+        + array_intersect_key($_GET, array_flip(['q', 'from_date', 'to_date', 'scrollPos']))),
     'extra_pages' => Config::get('EXTRA_PAGES'),
     'show_cookie_prompt' => !Cookie::get('ECK1C'),
 ];
@@ -175,17 +177,6 @@ $view['ops_avail'] = ['=', '<', '<=', '>', '>='];
 $view['date_input_values'] = $query_values['date'];
 if (($query_values['date']['<='] ?? null) == date('Y-m-d')) {
     $view['date_input_values']['<='] = '';
-}
-
-$view['addable_params'] = [];
-$params_avail = ['date' => 2, 'category' => 1, 'desc' => 1, 'amount' => 2, 'tag' => 1, 'account' => 1, 'show_all_cats' => 1];
-foreach ($params_avail as $param => $num_max) {
-    $show = $num_max > 1
-        ? count($query_values[$param]) < 2 || ($query_values[$param][''] ?? null) === ''
-        : empty($query_values[$param]);
-    if ($show) {
-        $view['addable_params'][] = $param;
-    }
 }
 
 $section_queries = [

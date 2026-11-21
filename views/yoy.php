@@ -10,44 +10,43 @@ $dataset = [
     'backgroundColor' => 'rgba(0, 123, 255, 0.3)',
 ];
 ?>
-<html>
+<!doctype html>
+<html lang="en" data-bs-theme="<?php echo $view['is_dark'] ? 'dark' : 'light' ?>">
 <head>
     <title>EasyMalt - Year-over-Year Per Category Graph</title>
-    <meta name="viewport" content="initial-scale=1.0, user-scalable=yes, width=device-width">
-    <link rel="preconnect" href="https://fonts.gstatic.com">
-    <link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
-    <style>
-        body {
-            font-family: 'Lato', sans-serif;
-        }
-        .chart {
-            height: 400px;
-        }
-    </style>
-    <link rel="stylesheet" type="text/css" href="../css/styles.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="../css/lib/bootstrap.min.css">
+    <link rel="stylesheet" href="../css/ui.css">
 </head>
 <body class="<?php echo ($view['is_dark'] ? 'dark' : '') ?>">
 
-&lt; <a href="/">Back</a>
-
-<h3>Year-over-Year Expense for
-    <select name="category" onchange="window.location.href='./?cat=' + encodeURIComponent(this.value)">
+<main class="container py-3 py-md-4">
+<nav class="mb-3" aria-label="Back navigation"><a href="/">&larr; Back</a></nav>
+<h1 class="h3 mb-3">Year-over-Year Expense</h1>
+<div class="mb-3" style="max-width: 24rem">
+    <label for="category" class="form-label">Category</label>
+    <select id="category" class="form-select" name="category" onchange="window.location.href='./?cat=' + encodeURIComponent(this.value)">
         <option value="">Choose a category</option>
         <?php foreach ($view['categories'] as $cat) : ?>
             <option value="<?php phe($cat) ?>" <?php echo_if($cat == $view['category_selected'], 'selected="selected"') ?>><?php phe($cat) ?></option>
         <?php endforeach; ?>
     </select>
-</h3>
+</div>
 
-<div>
+<div style="height: 400px">
     <canvas id="chart_bars" class="chart" width="100%" height="400"></canvas>
 </div>
+</main>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.4/dist/Chart.bundle.min.js" integrity="sha256-eA+ych7t31OjiXs3fYU0iWjn9HvXMiCLmunP2Gpghok=" crossorigin="anonymous"></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/chart.js@2.9.4/dist/Chart.min.css" integrity="sha256-aa0xaJgmK/X74WM224KMQeNQC2xYKwlAt08oZqjeF0E=" crossorigin="anonymous">
 
 <script>
     function drawBarChart() {
+        const dark = document.documentElement.dataset.bsTheme === 'dark';
+        const theme = getComputedStyle(document.documentElement);
+        Chart.defaults.global.defaultFontColor = dark ? theme.getPropertyValue('--em-ink').trim() : '#394c45';
+        Chart.defaults.scale.gridLines.color = dark ? theme.getPropertyValue('--em-line').trim() : '#d4dfd9';
         let ctx = document.getElementById("chart_bars").getContext('2d');
         new Chart(ctx, {
             type: 'bar',

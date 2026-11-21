@@ -1,0 +1,5 @@
+Chart.js 4.5.1, MIT license (see chart.LICENSE)
+https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.js
+
+Tom Select 2.4.3, Apache-2.0 license (see tom-select.LICENSE)
+https://cdn.jsdelivr.net/npm/tom-select@2.4.3/dist/js/tom-select.complete.min.js

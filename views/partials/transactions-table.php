@@ -10,22 +10,24 @@ if (!isset($view)) {
 $even = false;
 ?>
     <h3><?php phe($view['heading']) ?></h3>
-    <table class="txn_details" cellspacing="0">
-        <tr>
+    <div class="em-ledger table-responsive" tabindex="0" role="region" aria-label="<?php phe($view['heading']) ?>">
+    <table class="txn_details table table-sm" cellspacing="0">
+        <thead><tr>
             <th>Date</th>
             <th>Description</th>
             <th>Category</th>
             <th>Amount</th>
             <th>Account</th>
             <th>&nbsp;</th>
-        </tr>
+        </tr></thead>
+        <tbody>
         <?php foreach ($view['rows'] as $entry) : ?>
             <?php
             $row = $entry['transaction'];
             $memo = he($row->memo);
             if (preg_match_all('/Ref: #(\d+)/', $memo, $re)) {
                 for ($i=0; $i<count($re[0]); $i++) {
-                    $memo = str_replace($re[0][$i], 'Ref: <a href="/txn/?id='. $re[1][$i].'" onclick="return editTxn(this)">#'. $re[1][$i].'</a>', $memo);
+                    $memo = str_replace($re[0][$i], 'Ref: <a href="/txn/?id='. $re[1][$i].'" data-edit-transaction>#'. $re[1][$i].'</a>', $memo);
                 }
             }
             $classes = [];
@@ -44,25 +46,25 @@ $even = false;
             }
             ?>
             <tr class="<?php echo implode(' ', $classes) ?>">
-                <td class="date first"><?php echo substr($row->date, 0, 10) ?></td>
-                <td class="name">
+                <td class="date first" data-label="Date"><?php echo substr($row->date, 0, 10) ?></td>
+                <td class="name" data-label="Description">
                     <?php phe($row->name) ?><br/>
                     <small><?php echo nl2br($memo) ?></small>
                 </td>
-                <td class="category">
+                <td class="category" data-label="Category">
                     <a href="<?php echo getCurrentUrlReplacing($view['query'], 'category', $entry['category']) ?>"><?php phe($entry['category']) ?></a>
                     <br/><small><?php echo nl2br(he($row->tags)) ?></small>
                 </td>
-                <td class="amount">
+                <td class="amount" data-label="Amount">
                     <?php echo_amount($row->amount, $row->currency) ?>
                 </td>
-                <td class="account">
+                <td class="account" data-label="Account">
                     <a href="<?php echo getCurrentUrlReplacing($view['query'], 'account', (string) $row->account) ?>"><?php phe($row->account) ?></a>
                 </td>
-                <td>[<a href="/txn/?id=<?php echo $row->id ?>" onclick="return editTxn(this)">edit</a>]</td>
+                <td data-label="Action"><a class="em-transaction-edit" href="/txn/?id=<?php echo $row->id ?>" data-edit-transaction aria-label="Edit transaction <?php phe($row->name) ?>">Edit</a></td>
             </tr>
         <?php endforeach; ?>
-        <tr class="total <?php echo $view['heading'] ?>">
+        </tbody><tfoot><tr class="total <?php echo $view['heading'] ?>">
             <th>&nbsp;</th>
             <th>&nbsp;</th>
             <th>Total</th>
@@ -82,5 +84,6 @@ $even = false;
             </th>
             <th>&nbsp;</th>
             <th>&nbsp;</th>
-        </tr>
+        </tr></tfoot>
     </table>
+    </div>

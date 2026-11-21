@@ -1,0 +1,197 @@
+/* EasyMalt's compact ledger theme, loaded only by the interactive pages. */
+:root {
+    --em-ink: #263a38;
+    --em-muted: #64746f;
+    --em-line: #d4dfd9;
+    --em-paper: #f4f6f2;
+    --em-surface: #fff;
+    --em-accent: #315b90;
+    --em-income: #205b33;
+    --em-expense: #862f31;
+    --em-income-row: #cfe8d5;
+    --em-expense-row: #f2d2d4;
+    --em-excluded-row: #ced2d8;
+    --em-excluded-text: #5e6670;
+}
+
+[data-bs-theme="dark"] {
+    --em-ink: #e6e8eb;
+    --em-muted: #aab1bb;
+    --em-line: #3c4149;
+    --em-paper: #181a1d;
+    --em-surface: #23262b;
+    --em-accent: #a9c1ec;
+    --em-income: #94d4ad;
+    --em-expense: #ffada0;
+    --em-income-row: #21382c;
+    --em-expense-row: #402b30;
+    --em-excluded-row: #2d3036;
+    --em-excluded-text: #818892;
+}
+
+body {
+    background: var(--em-paper);
+    color: var(--em-ink);
+    font-family: "Trebuchet MS", sans-serif;
+    line-height: 1.45;
+}
+
+a { color: var(--em-accent); text-underline-offset: .16em; }
+a:hover { color: var(--em-ink); }
+:focus-visible { outline: 3px solid var(--em-accent); outline-offset: 3px; }
+button, input, select, textarea { max-width: 100%; }
+button, input, select, textarea, .btn { font-size: 1rem; }
+.form-control, .form-select, .btn { min-height: 2.65rem; }
+.table { --bs-table-bg: transparent; --bs-table-color: var(--em-ink); --bs-table-border-color: var(--em-line); }
+.table th { color: var(--em-muted); font-size: .75rem; letter-spacing: .06em; text-transform: uppercase; }
+.table td, .table th { vertical-align: middle; }
+.card { --bs-card-bg: var(--em-surface); --bs-card-border-color: var(--em-line); }
+.card-header { border-color: var(--em-line); background: transparent; }
+.text-muted, .text-body-secondary { color: var(--em-muted) !important; }
+.apply_to_all, .split_amount { display: none; }
+.apply_to_all { background: var(--em-paper); padding: .75rem; border-radius: .4rem; }
+.em-summary tr.hidden { opacity: .6; }
+.txn_details tbody tr.Income { background-color: var(--em-income-row); }
+.txn_details tbody tr.Expenses { background-color: var(--em-expense-row); }
+.txn_details tbody tr.hidden {
+    background-color: var(--em-excluded-row);
+    --bs-table-color: var(--em-excluded-text);
+}
+.txn_details tr.uncategorized { font-style: italic; }
+.txn_details .amount { white-space: nowrap; text-align: right; font-variant-numeric: tabular-nums; }
+.txn_details tr.Expenses:not(.hidden) :is(.amount, a) { color: var(--em-expense); }
+.txn_details tr.Income:not(.hidden) :is(.amount, a) { color: var(--em-income); }
+.txn_details tr.hidden a { color: inherit; }
+.txn_details tbody a:hover { text-decoration-thickness: .14em; }
+.em-transaction-edit {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2rem;
+    padding: .125rem .35rem;
+    border: 1px solid currentColor;
+    border-radius: .35rem;
+    font-size: .875rem;
+    font-weight: 700;
+    text-decoration: none;
+}
+.em-transaction-edit:hover { background-color: color-mix(in srgb, currentColor 9%, transparent); }
+.em-chart { max-width: 19rem; margin: 0 auto; }
+.em-chart-plot { position: relative; aspect-ratio: 1; }
+.em-chart-plot canvas { position: absolute; inset: 0; }
+.em-chart-legend { font-size: .8rem; }
+.em-chart-legend li { min-width: 0; max-width: 100%; }
+.em-dashboard .em-chart-key {
+    display: inline-flex;
+    align-items: center;
+    gap: .35rem;
+    padding: .15rem .25rem;
+    border: 0;
+    background: transparent;
+    font: inherit;
+    text-align: start;
+    overflow-wrap: anywhere;
+}
+.em-chart-key span { flex: 0 0 .75em; height: .75em; }
+.em-chart-key[aria-pressed="false"] { text-decoration: line-through; }
+.em-dashboard-frame { max-width: 76rem; margin-inline: auto; }
+.em-dashboard-header {
+    margin-bottom: 1.5rem;
+    padding: clamp(1rem, 3vw, 1.75rem);
+    border: 1px solid var(--em-line);
+    border-top: 3px solid var(--em-accent);
+    border-radius: .6rem;
+    background: var(--em-surface);
+}
+.em-dashboard-masthead, .em-dashboard-actions, .em-dashboard-nav, .em-report-period {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: .65rem 1rem;
+}
+.em-dashboard-masthead { justify-content: space-between; }
+.em-dashboard-eyebrow {
+    margin: 0 0 .2rem;
+    color: var(--em-muted);
+    font-size: .75rem;
+    font-weight: 700;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+}
+.em-dashboard-header h1 { margin: 0; font: 700 clamp(1.8rem, 4vw, 2.55rem)/1.12 Georgia, serif; }
+.em-dashboard-nav { margin-top: 1rem; padding-top: .75rem; border-top: 1px solid var(--em-line); gap: .25rem 1.25rem; }
+.em-dashboard-nav a { padding-block: .25rem; }
+.em-dashboard-primary {
+    --bs-btn-color: var(--em-surface);
+    --bs-btn-bg: var(--em-accent);
+    --bs-btn-hover-color: var(--em-surface);
+    --bs-btn-hover-bg: var(--em-ink);
+    --bs-btn-active-color: var(--em-surface);
+    --bs-btn-active-bg: var(--em-ink);
+}
+.em-dashboard-secondary {
+    --bs-btn-color: var(--em-ink);
+    --bs-btn-border-color: var(--em-line);
+    --bs-btn-hover-color: var(--em-accent);
+    --bs-btn-hover-bg: var(--em-paper);
+    --bs-btn-hover-border-color: var(--em-accent);
+}
+.em-filter-panel { border: 1px solid var(--em-line); border-radius: .6rem; background: var(--em-surface); }
+.em-report-period { padding: .75rem 1rem; border-bottom: 1px solid var(--em-line); }
+.em-report-period label, .em-search-details summary { font-weight: 700; }
+.em-report-period .form-select { width: auto; }
+.em-search-details summary { padding: .75rem 1rem; cursor: pointer; }
+.em-search-details summary::marker { color: var(--em-accent); }
+.em-filter-status {
+    margin-inline-start: .55rem;
+    padding: .15rem .45rem;
+    border-radius: .25rem;
+    background: var(--em-paper);
+    color: var(--em-accent);
+    font-size: .75rem;
+}
+.em-search-form { display: grid; gap: 1rem; padding: 1rem; border-top: 1px solid var(--em-line); }
+.em-filter-fields { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr)); }
+.em-search-form .form-label, .em-search-form legend, .em-report-period label {
+    font-size: .875rem;
+    font-weight: 700;
+}
+.em-filter-condition { display: grid; grid-template-columns: 4.5rem minmax(0, 1fr); gap: .5rem; }
+.em-filter-condition + .em-filter-condition { margin-top: .5rem; }
+.em-filter-condition .form-control { min-width: 0; }
+.em-filter-actions { border-top: 1px solid var(--em-line); padding-top: .85rem; }
+.em-transaction-page { max-width: 60rem; }
+.em-copy-reference { padding: 0; border: 0; background: none; color: var(--em-muted); font-size: .875rem; cursor: pointer; }
+.em-transaction-summary { display: flex; flex-wrap: wrap; gap: .75rem 2rem; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--em-line); }
+.em-transaction-summary > div { min-width: 0; overflow-wrap: anywhere; }
+.em-transaction-summary span { display: block; color: var(--em-muted); font-size: .8rem; }
+.em-transaction-summary strong { font-size: .95rem; }
+.em-transaction-page .card-body { padding: clamp(1rem, 3vw, 1.5rem); }
+.em-transaction-page .form-label { font-weight: 700; }
+.em-transaction-page input[type="date"] { width: 11rem; max-width: 100%; }
+.em-tag-groups { display: grid; grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr)); gap: .75rem 1.25rem; }
+.em-transaction-page .ts-control { min-height: 2.65rem; align-items: center; background: var(--bs-body-bg); color: var(--bs-body-color); }
+.em-transaction-page .ts-dropdown { color: var(--bs-body-color); border-color: var(--bs-border-color); }
+[data-bs-theme="dark"] .em-transaction-page .ts-dropdown .active { background: #39424f; color: var(--em-ink); }
+.em-transaction-actions { padding-block: .5rem 1.5rem; }
+
+@media (min-width: 576px) {
+    .txn_details thead th:first-child { min-width: 6.5rem; }
+    /* Description takes the remaining space after the other columns are sized. */
+    .txn_details thead th:nth-child(2) { width: 100%; }
+    .txn_details thead th:is(:nth-child(3), :nth-child(5)) { min-width: clamp(5.5rem, 15vw, 15rem); }
+    .txn_details thead th:nth-child(4) { text-align: right; }
+    .txn_details thead th:last-child { min-width: 3.25rem; }
+    .txn_details :is(th, td) { overflow-wrap: anywhere; }
+    .txn_details tr > :nth-child(4) { white-space: nowrap; }
+    .txn_details tbody td:first-child, .txn_details tbody td:last-child { white-space: nowrap; }
+}
+
+@media (max-width: 575.98px) {
+    body { overflow-wrap: anywhere; }
+    .table td, .table th { padding: .5rem; }
+    .em-ledger thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+    .em-ledger table, .em-ledger tbody, .em-ledger tbody tr, .em-ledger tbody td { display: block; width: 100%; }
+    .em-ledger tbody tr { padding: .65rem 0; border-bottom: 1px solid var(--em-line); }
+    .em-ledger tbody td { position: relative; padding-left: 6rem; border: 0; text-align: left; overflow-wrap: anywhere; }
+    .em-ledger tbody td::before { content: attr(data-label); position: absolute; left: .5rem; color: var(--bs-table-color); font-size: .8rem; font-weight: 700; }
+}

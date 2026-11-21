@@ -3,46 +3,58 @@ namespace EasyMalt;
 
 if (!isset($view)) { http_response_code(404); return; }
 ?>
-<html>
+<!doctype html>
+<html lang="en" data-bs-theme="<?php echo $view['is_dark'] ? 'dark' : 'light' ?>">
 <head>
     <title>EasyMalt - Accounts</title>
-    <meta name="viewport" content="initial-scale=1.0, user-scalable=yes, width=device-width">
-    <link rel="stylesheet" type="text/css" href="../css/styles.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="../css/lib/bootstrap.min.css">
+    <link rel="stylesheet" href="../css/ui.css">
 </head>
-<body>
-<div style="text-align: left">
-    &lt; <a href="<?php phe($view['back_link']) ?>">Back</a>
-</div>
-
-<table class="accounts" cellspacing="0">
+<body class="<?php echo $view['is_dark'] ? 'dark' : '' ?>">
+<main class="container py-3 py-md-4">
+<nav class="mb-3" aria-label="Back navigation"><a href="<?php phe($view['back_link']) ?>">&larr; Back</a></nav>
+<h1 class="h3 mb-3">Accounts</h1>
+<div class="table-responsive">
+<table class="table table-sm table-striped align-middle w-auto mw-100 mx-auto accounts">
+    <thead>
     <tr>
         <th>Account</th>
-        <th>Balance</th>
-        <th>Last Updated</th>
+        <th class="text-end">Balance</th>
+        <th class="text-center ps-3">Last Updated</th>
     </tr>
+    </thead>
+    <tbody>
     <?php foreach ($view['rows'] as $row) : ?>
         <tr class="<?php echo (($even=!@$even) ? 'even' : 'odd') ?>">
             <td class="name">
                 <a href="/search?q=<?php echo urlencode("account=$row->name") ?>"><?php phe($row->name) ?></a>
             </td>
-            <td style="text-align: right">
+            <td class="text-end text-nowrap">
                 <?php echo_amount($row->balance, $row->currency) ?>
             </td>
-            <td>
+            <td class="text-start ps-3">
                 <?php echo (empty($row->last_updated) ? 'N/A' : he($row->last_updated)) ?>
             </td>
         </tr>
     <?php endforeach; ?>
+    </tbody>
+    <tfoot class="fw-bold">
     <?php foreach ($view['totals'] as $currency => $total) : ?>
         <tr class="<?php echo (($even=!@$even) ? 'even' : 'odd') ?>">
             <td class="name">
-                Total (<?php echo $currency ?>)
+                Total (<?php phe($currency) ?>)
             </td>
-            <td style="text-align: right">
+            <td class="text-end text-nowrap">
                 <?php echo_amount($total, $currency) ?>
             </td>
             <td>
             </td>
         </tr>
     <?php endforeach; ?>
+    </tfoot>
 </table>
+</div>
+</main>
+</body>
+</html>

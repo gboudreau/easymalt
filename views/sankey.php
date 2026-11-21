@@ -6,39 +6,43 @@ if (!isset($view)) {
     return;
 }
 ?>
-<html>
+<!doctype html>
+<html lang="en" data-bs-theme="<?php echo $view['is_dark'] ? 'dark' : 'light' ?>">
 <head>
     <title>EasyMalt - Sankey Yearly Graph</title>
-    <meta name="viewport" content="initial-scale=1.0, user-scalable=yes, width=device-width">
-    <link rel="preconnect" href="https://fonts.gstatic.com">
-    <link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
-        body {
-            font-family: 'Lato', sans-serif;
-        }
         .chart {
             height: 1000px;
         }
     </style>
-    <link rel="stylesheet" type="text/css" href="../css/styles.css">
+    <link rel="stylesheet" href="../css/lib/bootstrap.min.css">
+    <link rel="stylesheet" href="../css/ui.css">
 </head>
 <body class="<?php echo ($view['is_dark'] ? 'dark' : '') ?>">
 
-&lt; <a href="/">Back</a>
-
-<h3>Income vs Expenses for
-    <select name="year" onchange="window.location.href='./?year=' + encodeURIComponent(this.value)">
+<main class="container-fluid py-3 py-md-4">
+<nav class="mb-3" aria-label="Back navigation"><a href="/">&larr; Back</a></nav>
+<h1 class="h3 mb-3">Income vs Expenses</h1>
+<div class="mb-3" style="max-width: 12rem">
+    <label for="year" class="form-label">Year</label>
+    <select id="year" class="form-select" name="year" onchange="window.location.href='./?year=' + encodeURIComponent(this.value)">
         <?php foreach ($view['years'] as $y) : ?>
             <option value="<?php phe($y) ?>" <?php echo_if($y == $view['year_selected'], 'selected="selected"') ?>><?php phe($y) ?></option>
         <?php endforeach; ?>
     </select>
-</h3>
-
-<div style="background-color: #fff; padding: 1em">
-    <canvas id="chart_sankey_1" class="chart" width="100%"></canvas>
 </div>
 
+<div class="overflow-auto mb-4" role="region" aria-label="Income and expenses chart" tabindex="0">
+<div style="background-color: #fff; padding: 1em; min-width: 800px">
+    <canvas id="chart_sankey_1" class="chart" width="100%"></canvas>
+</div>
+</div>
+
+<div class="table-responsive">
 <?php renderView('partials/transactions-table', $view['transaction_table']) ?>
+</div>
+</main>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js" integrity="sha512-ElRFoEQdI5Ht6kZvyzXhYG9NqjtkmlkfYk0wr6wHxU9JEHakS7UJZNeml5ALk+8IKlU6jDgMabC3vkumRokgJA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-sankey@0.12.0/dist/chartjs-chart-sankey.min.js" integrity="sha256-Vp8loK4QI+oJDJo0ILHon0XzGptFPOjUQ5PUhjrxDWs=" crossorigin="anonymous"></script>
