@@ -6,6 +6,7 @@ use Delight\Cookie\Cookie;
 
 require_once 'vendor/autoload.php';
 require_once 'functions.inc.php';
+require_once __DIR__.'/views/render.inc.php';
 
 // Connect to DB ASAP, since it's where we'll save PHP errors
 try {

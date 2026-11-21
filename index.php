@@ -36,46 +36,24 @@ if (!empty($_POST['do_search'])) {
     header('Location: ./?q=' . urlencode(implode(' AND ', $query)));
     exit();
 }
-?>
-<html lang="en">
-<head>
-    <title>Easy mint Alternative</title>
-    <meta name="viewport" content="initial-scale=1.0, user-scalable=no, width=device-width">
-    <link rel="stylesheet" type="text/css" href="css/styles.css">
-</head>
-<body class="<?php echo ($GLOBALS['is_dark'] ? 'dark' : '') ?>">
 
-<div id="dark_switcher">
-    <a href="./?dark=<?php echo ($GLOBALS['is_dark'] ? 0 : 1)?>">Go <?php echo ($GLOBALS['is_dark'] ? 'light' : 'dark')?></a>
-</div>
-<div style="text-align: center">
-    Go to:
-    <a href="accounts/">Accounts</a>
-    | <a href="txn/?id=new">New Transaction</a>
-    <?php if (Config::get('EXTRA_PAGES')) : ?>
-        <?php foreach (Config::get('EXTRA_PAGES') as $url => $page_name) : ?>
-            | <a href="<?php echo $url ?>"><?php phe($page_name) ?></a>
-        <?php endforeach; ?>
-    <?php endif; ?>
-</div>
 
-<?php
-if (!Cookie::get('ECK1C')) {
-    ?>
-    <h3>Missing ECK1C value in cookies. Find it in 1Password.</h3>
-    <form method="post" action="">
-        <input type="text" name="ECK1C" /><br/><br/>
-        <input type="submit" value="Save" />
-    </form>
-    </body>
-    </html>
-    <?php
-    exit();
+$view = [
+    'is_dark' => $GLOBALS['is_dark'],
+    'extra_pages' => Config::get('EXTRA_PAGES'),
+    'show_cookie_prompt' => !Cookie::get('ECK1C'),
+];
+
+if ($view['show_cookie_prompt']) {
+    renderView('dashboard', $view);
+    return;
 }
 
-$builder = new DBQueryBuilder();
+require_once __DIR__ . '/transaction-report.inc.php';
 
-$query = explode(' AND ', $_GET['q'] ?? '');
+$builder = new DBQueryBuilder();
+$effective_get = $_GET;
+$query = explode(' AND ', $effective_get['q'] ?? '');
 $query_values = [];
 foreach ($query as $k => $q) {
     if (preg_match('/(category|desc|amount|tag|date|account|ids|show_all_cats)\s?([=><]{1,2})\s?(.*)\s?/', $q, $matches)) {
@@ -113,13 +91,14 @@ foreach ($query as $k => $q) {
             $builder->where("t.tags LIKE :tag", '%' . $value .'%');
         }
         if ($query_type == 'date') {
-            $query_values['date'][$operator] = date('Y-m-d', strtotime($value));
-            $builder->where('DATE(t.date) ' . $operator . ' :date' . $k, date('Y-m-d', strtotime($value)));
+            $date = date('Y-m-d', strtotime($value));
+            $query_values['date'][$operator] = $date;
+            $builder->where('DATE(t.date) ' . $operator . ' :date' . $k, $date);
             if ($operator == '>=') {
-                $_GET['from_date'] = date('Y-m-d', strtotime($value));
+                $effective_get['from_date'] = $date;
             }
             if ($operator == '<=') {
-                $_GET['to_date'] = date('Y-m-d', strtotime($value));
+                $effective_get['to_date'] = $date;
             }
         }
         if ($query_type == 'account') {
@@ -137,57 +116,38 @@ foreach ($query as $k => $q) {
     }
 }
 
-// Show the Search Parameters form only if the user used it to execute a search
-// Otherwise, show the Quick dates selector, and a "Search..." button
-$show_search_params = !empty($query_values);
-?>
-
-<?php if (!$show_search_params) : ?>
-    <!-- Quick dates selector; much faster to select common dates with this than using the Date search parameters -->
-    <?php
-    $from_date = !empty($_GET['from_date']) ? $_GET['from_date'] : date('Y-m-d', strtotime('-15 days'));
-    $to_date = !empty($_GET['to_date']) ? $_GET['to_date'] : date('Y-m-d');
-    $from_to_query = 'from_date=' . date('Y-m-d', strtotime($from_date)) . '&to_date=' . date('Y-m-d', strtotime($to_date));
+// Show quick dates instead of the search form when no explicit search was used.
+$view['show_search_params'] = !empty($query_values);
+if (!$view['show_search_params']) {
+    $from_date = !empty($effective_get['from_date']) ? $effective_get['from_date'] : date('Y-m-d', strtotime('-15 days'));
+    $to_date = !empty($effective_get['to_date']) ? $effective_get['to_date'] : date('Y-m-d');
+    $view['from_to_query'] = 'from_date=' . date('Y-m-d', strtotime($from_date)) . '&to_date=' . date('Y-m-d', strtotime($to_date));
 
     $dates = [];
-    // Last X days
-    foreach (array(15, 30, 60, 90, 365) as $days) {
+    foreach ([15, 30, 60, 90, 365] as $days) {
         $from = strtotime("-$days days");
         $to = time();
         $dates['from_date=' . date('Y-m-d', $from) . '&to_date=' . date('Y-m-d', $to)] = "Last $days days";
     }
-
-    // Month Year (for last 12 months)
     for ($t = time(); $t > strtotime('-12 months'); $t = strtotime('-1 month', $t)) {
         $dates['from_date=' . date('Y-m-01', $t) . '&to_date=' . date('Y-m-d', strtotime(date('Y-m-01', strtotime('next month', $t)))-1)] = date("M Y", $t);
     }
-    ?>
-    <div style="margin-top: 1em; text-align: center">
-        Report dates:
-        <select onchange="window.location.href='./?' + this.value">
-            <?php foreach ($dates as $value => $name) : ?>
-                <option value="<?php phe($value) ?>" <?php echo_if($value == $from_to_query, 'selected="selected"') ?>><?php phe($name) ?></option>
-            <?php endforeach; ?>
-        </select>
-    </div>
-    <?php
-    // Use the $from_date and $to_date in the Query, unless there are already dates in there, or we are searching by IDs
+    $view['quick_dates'] = $dates;
+
     if (empty($query_values['date']) && empty($query_values['ids'])) {
         $builder->where('DATE(t.date) >= :from_date', $from_date);
         $builder->where('DATE(t.date) <= :to_date', $to_date);
         $query_values['date']['>='] = $from_date;
         $query_values['date']['<='] = $to_date;
     }
-    if (empty($_GET['q'])) {
-        $_GET['q'] = "date >= $from_date AND date <= $to_date";
+    if (empty($effective_get['q'])) {
+        $effective_get['q'] = "date >= $from_date AND date <= $to_date";
     }
-    ?>
-<?php endif; ?>
+}
+$effective_query = $effective_get['q'] ?? '';
 
-<?php
-// Categories list; add values for 'root categories', to be able to get report for those, even if no transactions
-$q = "SELECT DISTINCT name FROM categories ORDER BY name";
-$categories = DB::getAllValues($q);
+// Include root categories as filter options even if they have no transactions.
+$categories = DB::getAllValues("SELECT DISTINCT name FROM categories ORDER BY name");
 array_unshift($categories, NO_CATEGORY_NAME);
 $categories_plus = [];
 foreach ($categories as $cat) {
@@ -200,154 +160,35 @@ foreach ($categories as $cat) {
     }
     $categories_plus[] = $cat;
 }
-$categories = $categories_plus;
+$view['categories'] = $categories_plus;
+$view['tags'] = DB::getAllValues("SELECT DISTINCT name FROM tags ORDER BY name");
+$view['accounts'] = DB::getAllValues("SELECT DISTINCT name FROM accounts WHERE name <> '' ORDER BY name");
 
-// Tags list
-$q = "SELECT DISTINCT name FROM tags ORDER BY name";
-$tags = DB::getAllValues($q);
-
-// Accounts list
-$q = "SELECT DISTINCT name FROM accounts WHERE name <> '' ORDER BY name";
-$accounts = DB::getAllValues($q);
-
-// Allow two Date parameters (after and before)
-if (!is_array(@$query_values['date']) || count($query_values['date']) < 2) {
-    $query_values['date'][''] = '';
+// Allow a second date or amount parameter if fewer than two were supplied.
+foreach (['date', 'amount'] as $param) {
+    if (count($query_values[$param] ?? []) < 2) {
+        $query_values[$param][''] = '';
+    }
 }
-// Allow two Amount parameters (higher than and lower than)
-if (!is_array(@$query_values['amount']) || count($query_values['amount']) < 2) {
-    $query_values['amount'][''] = '';
+$view['query_values'] = $query_values;
+$view['ops_avail'] = ['=', '<', '<=', '>', '>='];
+$view['date_input_values'] = $query_values['date'];
+if (($query_values['date']['<='] ?? null) == date('Y-m-d')) {
+    $view['date_input_values']['<='] = '';
 }
-$ops_avail = ['=', '<', '<=', '>', '>='];
-?>
 
-<?php if (!$show_search_params) : ?>
-    <div style="text-align: center; margin-top: 1em">
-        <button onclick="$('#search_form').show(); $(this).hide();">Search...</button>
-    </div>
-<?php endif; ?>
+$view['addable_params'] = [];
+$params_avail = ['date' => 2, 'category' => 1, 'desc' => 1, 'amount' => 2, 'tag' => 1, 'account' => 1, 'show_all_cats' => 1];
+foreach ($params_avail as $param => $num_max) {
+    $show = $num_max > 1
+        ? count($query_values[$param]) < 2 || ($query_values[$param][''] ?? null) === ''
+        : empty($query_values[$param]);
+    if ($show) {
+        $view['addable_params'][] = $param;
+    }
+}
 
-<form id="search_form" action="./" method="post" style="text-align: center; display: <?php echo_if($show_search_params, 'block', 'none') ?>">
-    <h3>Search Parameters</h3>
-    <input name="do_search" value="1" type="hidden" />
-    <table class="search_query" style="display: inline">
-        <tr class="table-row-ids" style="display: <?php echo_if(!empty($query_values['ids']), 'table-row', 'none') ?>">
-            <td>IDs</td>
-            <td><input name="ids" type="text" value="<?php phe(@$query_values['ids']) ?>" /></td>
-        </tr>
-        <?php foreach ($query_values['date'] as $op => $value) : ?>
-            <tr class="table-row-date" style="display: <?php echo_if(!empty($value), 'table-row', 'none') ?>">
-                <td>Date</td>
-                <td>
-                    <select name="date_op[]">
-                        <?php foreach ($ops_avail as $opa) : ?>
-                            <option value="<?php phe($opa) ?>" <?php echo_if($op == $opa, 'selected="selected"') ?>><?php phe($opa) ?></option>
-                        <?php endforeach; ?>
-                    </select>
-                    <input name="date[]" type="date" value="<?php phe($op == '<=' && $value == date('Y-m-d') ? '' : $value) ?>" />
-                    [<a href="#clear" onclick="$(this).parent().find('input').val(''); return false">clear</a>]
-                </td>
-            </tr>
-        <?php endforeach; ?>
-        <tr class="table-row-category" style="display: <?php echo_if(!empty($query_values['category']), 'table-row', 'none') ?>">
-            <td>Category</td>
-            <td>
-                <select name="category">
-                    <option value="">Choose a category</option>
-                    <?php foreach ($categories as $cat) : ?>
-                        <option value="<?php phe($cat) ?>" <?php echo_if(@$query_values['category'] == $cat, 'selected="selected"') ?>><?php phe($cat) ?></option>
-                    <?php endforeach; ?>
-                </select>
-            </td>
-        </tr>
-        <tr class="table-row-desc" style="display: <?php echo_if(!empty($query_values['desc']), 'table-row', 'none') ?>">
-            <td>Description</td>
-            <td><input name="desc" type="text" value="<?php phe(@$query_values['desc']) ?>" /></td>
-        </tr>
-        <?php foreach ($query_values['amount'] as $op => $value) : ?>
-            <tr class="table-row-amount" style="display: <?php echo_if(!empty($value), 'table-row', 'none') ?>">
-                <td>Amount</td>
-                <td>
-                    <select name="amount_op[]">
-                        <?php foreach ($ops_avail as $opa) : ?>
-                            <option value="<?php phe($opa) ?>" <?php echo_if($op == $opa, 'selected="selected"') ?>><?php phe($opa) ?></option>
-                        <?php endforeach; ?>
-                    </select>
-                    <input name="amount[]" type="number" step="0.01" value="<?php phe($value) ?>" />
-                </td>
-            </tr>
-        <?php endforeach; ?>
-        <tr class="table-row-tag" style="display: <?php echo_if(!empty($query_values['tag']), 'table-row', 'none') ?>">
-            <td>Tag</td>
-            <td>
-                <select name="tag">
-                    <option value="">Choose a tag</option>
-                    <?php foreach ($tags as $tag) : ?>
-                        <option value="<?php phe($tag) ?>" <?php echo_if(@$query_values['tag'] == $tag, 'selected="selected"') ?>><?php phe($tag) ?></option>
-                    <?php endforeach; ?>
-                </select>
-            </td>
-        </tr>
-        <tr class="table-row-account" style="display: <?php echo_if(!empty($query_values['account']), 'table-row', 'none') ?>">
-            <td>Account</td>
-            <td>
-                <select name="account">
-                    <option value="">Choose an account</option>
-                    <?php foreach ($accounts as $account) : ?>
-                        <option value="<?php phe($account) ?>" <?php echo_if(@$query_values['account'] == $account, 'selected="selected"') ?>><?php phe($account) ?></option>
-                    <?php endforeach; ?>
-                </select>
-            </td>
-        </tr>
-        <tr class="table-row-show_all_cats" style="display: <?php echo_if(!empty($query_values['show_all_cats']), 'table-row', 'none') ?>">
-            <td>Show all categories?</td>
-            <td>
-                <input name="show_all_cats" type="checkbox" value="1" <?php echo_if(@$query_values['show_all_cats'], 'checked') ?> />
-            </td>
-        </tr>
-        <tr>
-            <td>Add parameter</td>
-            <td>
-                |
-                <?php
-                $params_avail = ['date' => 2, 'category' => 1, 'desc' => 1, 'amount' => 2, 'tag' => 1, 'account' => 1, 'show_all_cats' => 1];
-                foreach ($params_avail as $param => $num_max) {
-                    if ($num_max > 1) {
-                        $show = count($query_values[$param]) < 2 || @$query_values[$param][''] === '';
-                    } else {
-                        $show = empty($query_values[$param]);
-                    }
-                    if ($show) {
-                        echo '<a href="#" onclick=\'showSearchParameter(event, ' . json_encode($param) . ', this)\'>' . ucfirst($param) . '</a> | ';
-                    }
-                }
-                ?>
-                <script>
-                    function showSearchParameter(event, el_class, link) {
-                        event = event || window.event;
-                        event.preventDefault();
-                        $('.table-row-' + el_class).show();
-                        $(link).hide();
-                        if (el_class === 'show_all_cats') {
-                            $('[name=show_all_cats]').prop('checked', true);
-                            $('[name=show_all_cats]').closest('form')[0].submit();
-                        }
-                    }
-                </script>
-            </td>
-        </tr>
-        <tr>
-            <td></td>
-            <td>
-                <input type="submit" value="Search" />
-                <small style="margin-left: 0.5em"><a href="./">Clear search parameters</a></small>
-            </td>
-        </tr>
-    </table>
-</form>
-
-<?php
-$sections = [
+$section_queries = [
     'Expenses' => [
         'where'    => "t.amount < 0 OR (t.amount = 0 AND t.type = 'DEBIT')",
         'order_by' => "amount ASC"
@@ -357,15 +198,15 @@ $sections = [
         'order_by' => "amount DESC"
     ]
 ];
-?>
-<?php foreach ($sections as $what => $select) : ?>
-    <?php
-    $builder_s = clone $builder;
+$view['sections'] = [];
+$view['pie_url'] = getCurrentUrlReplacing($effective_query, 'category', '__category__');
+$first_row = true;
 
+foreach ($section_queries as $what => $select) {
+    $builder_s = clone $builder;
     $builder_s->select("SUM(t.amount) AS amount, IFNULL(a.currency, 'CAD') AS currency, t.hidden")
         ->from("v_transactions_reports", 't')
         ->leftJoin("accounts a", 'a.id = t.account_id')
-        //->where('t.hidden', 'no')
         ->where($select['where'])
         ->groupBy('currency')
         ->orderBy($select['order_by']);
@@ -377,161 +218,73 @@ $sections = [
     }
 
     $data = $builder_s->getAll();
-
     if (empty($data)) {
         continue;
     }
 
-    $total = [];
-    ?>
-    <h3 class="with_pie_chart"><?php phe($what) ?></h3>
-    <table class="with_pie_chart" cellspacing="0">
-        <tr>
-            <th>Category</th>
-            <th>Spending</th>
-        </tr>
-        <?php foreach ($data as $row) : ?>
-            <?php
-            if ($row->hidden == 'no') {
-                @$total[$row->currency] += $row->amount;
-            }
-            $classes = [$what];
-            $classes[] = $even =! @$even ? 'even' : 'odd';
-            if ($row->category == NULL) {
-                $classes[] = 'uncategorized';
-            }
-            if ($row->hidden == 'yes') {
-                $classes[] = 'hidden';
-            }
-            if ($row->category == 'Netlift') {
-                $classes[] = 'netlift';
-            }
-            ?>
-            <tr class="<?php echo implode(' ', $classes) ?>">
-                <?php if ($row->category == NULL) { $row->category = NO_CATEGORY_NAME; } ?>
-                <td><a href="<?php echo getCurrentUrlReplacing('category', $row->category) ?>"><?php phe($row->category) ?></a></td>
-                <td style="text-align: right">
-                    <?php echo_amount($row->amount, $row->currency) ?>
-                </td>
-            </tr>
-        <?php endforeach; ?>
-        <tr class="total <?php echo $what ?>">
-            <th>Total</th>
-            <th style="text-align: right">
-                <?php
-                foreach ($total as $currency => $tot) {
-                    if ($tot == 0 && !is_default_currency($currency)) {
-                        continue;
-                    }
-                    if (!is_default_currency($currency)) {
-                        echo "+&nbsp;";
-                    }
-                    echo_amount($tot, $currency);
-                    echo '<br/>';
-                }
-                ?>
-            </th>
-        </tr>
-    </table>
-
-    <div class="pie_chart" id="chart_div_<?php echo $what ?>"></div>
-    <script>
-        function drawPie<?php echo $what ?>() {
-            <?php
-            $js_data = [['Category', 'Spending']];
-            foreach ($data as $row) {
-                if ($row->hidden == 'yes') continue;
-                $js_data[] = [$row->category, abs($row->amount)];
-            }
-            ?>
-            var data = google.visualization.arrayToDataTable(<?php echo json_encode($js_data); ?>);
-
-            var is_dark = $('body').hasClass('dark');
-            var options = {
-                is3D: true,
-                sliceVisibilityThreshold: 3/100.0,
-                backgroundColor: is_dark ? '#333' : 'white',
-                legend: {textStyle: {color: is_dark ? '#eee' : 'black'}}
-            };
-
-            var chart = new google.visualization.PieChart(document.getElementById('chart_div_<?php echo $what ?>'));
-
-            function selectHandler() {
-                var selectedItem = chart.getSelection()[0];
-                if (selectedItem) {
-                    var category = data.getValue(selectedItem.row, 0);
-                    var current_url = <?php echo json_encode(getCurrentUrlReplacing('category', '__category__')) ?>;
-                    window.location.href = current_url.replace('__category__', encodeURIComponent(category));
-                }
-            }
-            google.visualization.events.addListener(chart, 'select', selectHandler);
-
-            chart.draw(data, options);
+    $rows = [];
+    $totals_by_currency = [];
+    $pie_data = [['Category', 'Spending']];
+    foreach ($data as $row) {
+        if ($row->hidden == 'no') {
+            $totals_by_currency[$row->currency] = ($totals_by_currency[$row->currency] ?? 0) + $row->amount;
         }
-    </script>
-    <div style="clear: both"></div>
-<?php endforeach; ?>
+        // The existing markup labels only the first grouped row as even.
+        $classes = [$what, $first_row ? 'even' : 'odd'];
+        $first_row = false;
+        $uncategorized = $row->category == null;
+        if ($uncategorized) {
+            $classes[] = 'uncategorized';
+        }
+        if ($row->hidden == 'yes') {
+            $classes[] = 'hidden';
+        }
+        if ($row->category == 'Netlift') {
+            $classes[] = 'netlift';
+        }
 
-<?php
+        $category = $uncategorized ? NO_CATEGORY_NAME : $row->category;
+        $rows[] = [
+            'class' => implode(' ', $classes),
+            'url' => getCurrentUrlReplacing($effective_query, 'category', $category),
+            'category' => $category,
+            'amount' => $row->amount,
+            'currency' => $row->currency,
+        ];
+        if ($row->hidden != 'yes') {
+            $pie_data[] = [$category, abs($row->amount)];
+        }
+    }
+
+    $totals = [];
+    foreach ($totals_by_currency as $currency => $amount) {
+        $is_default_currency = is_default_currency($currency);
+        if ($amount == 0 && !$is_default_currency) {
+            continue;
+        }
+        $totals[] = [
+            'currency' => $currency,
+            'amount' => $amount,
+            'is_default_currency' => $is_default_currency,
+        ];
+    }
+    $view['sections'][$what] = ['rows' => $rows, 'totals' => $totals, 'pie_data' => $pie_data];
+}
+
 $builder->select("t.id, t.date, t.name, t.memo, t.category, t.tags, t.amount, t.hidden, a.currency, a.name AS account")
     ->from("v_transactions_reports", 't')
     ->join('accounts a', "a.id = t.account_id")
     ->orderBy("t.date DESC, t.id DESC");
 
-$data = $builder->getAll();
+$transactions = $builder->getAll();
+$view['transaction_table'] = empty($transactions)
+    ? null
+    : prepareTransactionTable($transactions, 'Transactions Details', $effective_query);
 
-if (empty($data)) {
-    echo "No transactions.";
-} else {
-    printTransactionsTable($data, 'Transactions Details');
-}
-?>
+$scroll_position = $effective_get['scrollPos'] ?? null;
+$view['scroll_position'] = !empty($scroll_position) && is_numeric($scroll_position) ? $scroll_position + 0 : null;
+unset($effective_get['scrollPos']);
+$view['history_url'] = '/?' . http_build_query($effective_get) . '&scrollPos=';
 
-<script src="https://code.jquery.com/jquery-3.1.1.min.js"
-        integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
-        crossorigin="anonymous"></script>
-<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
-<script>
-    var scrollPosition = 0;
-    $(function() {
-        scrollPosition = Math.round($(document).scrollTop());
-        $(window).scroll(function() {
-            scrollPosition = Math.round($(document).scrollTop());
-            history.replaceState(null, '', <?php $get = $_GET; unset($get['scrollPos']); echo json_encode('/?' . http_build_query($get) . '&scrollPos=') ?>+scrollPosition);
-        });
-        <?php if (!empty($_GET['scrollPos'])) : ?>
-        $('html, body').animate({
-            scrollTop: <?php echo $_GET['scrollPos'] ?>
-        }, 300);
-        <?php endif; ?>
-    });
-
-    function editTxn(el) {
-        $(el).attr('href', $(el).attr('href') + '&scrollPos=' + scrollPosition);
-        return true;
-    }
-
-    $(function() {
-        $('table.txn_details td.amount').each(function () {
-            if (!window.matchMedia('screen and (max-device-width: 480px)').matches) {
-                return;
-            }
-            var date_top_pos = $(this).parent().find('td.first').position().top;
-            var amount_top_pos = $(this).position().top;
-            var diff = amount_top_pos - date_top_pos;
-            $(this).css('margin-top', '-' + diff + 'px');
-        });
-    });
-
-    google.charts.load('current', {packages: ['corechart']});
-    if (typeof drawPieExpenses === 'function') {
-        google.charts.setOnLoadCallback(drawPieExpenses);
-    }
-    if (typeof drawPieIncome === 'function') {
-        google.charts.setOnLoadCallback(drawPieIncome);
-    }
-</script>
-</body>
-</html>
-<?php
+renderView('dashboard', $view);
 $_SESSION['previous_page'] = preg_replace('/&scrollPos=\d+/', '', $_SERVER['REQUEST_URI']);
