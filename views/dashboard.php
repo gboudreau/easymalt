@@ -19,24 +19,7 @@ $is_dark = $view['is_dark'];
 <body class="em-dashboard <?php echo ($is_dark ? 'dark' : '') ?>">
 <main class="container-fluid py-3">
 
-<header class="em-dashboard-header em-dashboard-frame">
-    <div class="em-dashboard-masthead">
-        <div>
-            <p class="em-dashboard-eyebrow">EasyMalt</p>
-            <h1>Dashboard</h1>
-        </div>
-        <div class="em-dashboard-actions">
-            <a class="btn em-dashboard-secondary" href="<?php phe($view['theme_url']) ?>"><?php echo $is_dark ? 'Light mode' : 'Dark mode' ?></a>
-            <a class="btn em-dashboard-primary" href="txn/?id=new">New transaction</a>
-        </div>
-    </div>
-    <nav class="em-dashboard-nav" aria-label="Main navigation">
-        <a href="accounts/">Accounts</a>
-        <?php foreach (($view['extra_pages'] ?: []) as $url => $page_name) : ?>
-            <a href="<?php phe($url) ?>"><?php phe($page_name) ?></a>
-        <?php endforeach; ?>
-    </nav>
-</header>
+<?php renderPageHeader('Dashboard', $is_dark, ['q', 'from_date', 'to_date', 'scrollPos'], show_dashboard_link: false) ?>
 
 <?php
 if ($view['show_cookie_prompt']) {
@@ -137,6 +120,7 @@ $query_values = $view['query_values'];
     </details>
 </section>
 
+<div class="em-dashboard-frame">
 <div class="row g-3 my-3">
 <?php foreach ($view['sections'] as $what => $section) : ?>
     <section class="col-12 col-xl-6 em-summary" aria-label="<?php phe($what) ?> summary">
@@ -197,6 +181,7 @@ if ($view['transaction_table'] === null) {
     renderView('partials/transactions-table', $view['transaction_table']);
 }
 ?>
+</div>
 
 <script src="js/lib/chart.umd.min.js"></script>
 <script>

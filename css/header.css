@@ -1,0 +1,88 @@
+/* Shared by the interactive pages and the standalone Taxes report. */
+:root {
+    --em-ink: #263a38;
+    --em-muted: #64746f;
+    --em-line: #d4dfd9;
+    --em-paper: #f4f6f2;
+    --em-surface: #fff;
+    --em-accent: #315b90;
+}
+
+[data-bs-theme="dark"] {
+    --em-ink: #e6e8eb;
+    --em-muted: #aab1bb;
+    --em-line: #3c4149;
+    --em-paper: #181a1d;
+    --em-surface: #23262b;
+    --em-accent: #a9c1ec;
+}
+
+.em-dashboard-frame { max-width: 84rem; margin-inline: auto; }
+.em-dashboard-header {
+    box-sizing: border-box;
+    margin-bottom: 1.5rem;
+    padding: clamp(1rem, 3vw, 1.75rem);
+    border: 1px solid var(--em-line);
+    border-top: 3px solid var(--em-accent);
+    border-radius: .6rem;
+    background: var(--em-surface);
+    color: var(--em-ink);
+    font: 1rem/1.45 "Trebuchet MS", sans-serif;
+}
+.em-dashboard-masthead, .em-dashboard-actions, .em-dashboard-nav {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: .65rem 1rem;
+}
+.em-dashboard-masthead { justify-content: space-between; }
+.em-dashboard-eyebrow {
+    margin: 0 0 .2rem;
+    color: var(--em-muted);
+    font-size: .75rem;
+    font-weight: 700;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+}
+.em-dashboard-header h1 { margin: 0; font: 700 clamp(1.8rem, 4vw, 2.55rem)/1.12 Georgia, serif; }
+.em-dashboard-nav { margin-top: 1rem; padding-top: .75rem; border-top: 1px solid var(--em-line); gap: .25rem 1.25rem; }
+.em-dashboard-nav a { padding-block: .25rem; color: var(--em-accent); text-underline-offset: .16em; }
+.em-dashboard-nav a:hover { color: var(--em-ink); }
+.em-dashboard-header a:focus-visible { outline: 3px solid var(--em-accent); outline-offset: 3px; }
+.em-dashboard-primary {
+    --bs-btn-color: var(--em-surface);
+    --bs-btn-bg: var(--em-accent);
+    --bs-btn-hover-color: var(--em-surface);
+    --bs-btn-hover-bg: var(--em-ink);
+    --bs-btn-active-color: var(--em-surface);
+    --bs-btn-active-bg: var(--em-ink);
+}
+.em-dashboard-secondary {
+    --bs-btn-color: var(--em-ink);
+    --bs-btn-border-color: var(--em-line);
+    --bs-btn-hover-color: var(--em-accent);
+    --bs-btn-hover-bg: var(--em-paper);
+    --bs-btn-hover-border-color: var(--em-accent);
+}
+.em-dashboard-header .em-dashboard-actions a {
+    box-sizing: border-box;
+    min-height: 2.65rem;
+    padding: .375rem .75rem;
+    border: 1px solid var(--bs-btn-border-color, transparent);
+    border-radius: .375rem;
+    background: var(--bs-btn-bg, transparent);
+    color: var(--bs-btn-color);
+    line-height: 1.5;
+    text-decoration: none;
+}
+.em-dashboard-header .em-dashboard-actions a:hover {
+    border-color: var(--bs-btn-hover-border-color, transparent);
+    background: var(--bs-btn-hover-bg);
+    color: var(--bs-btn-hover-color);
+}
+.em-filter-panel {
+    border: 1px solid var(--em-line);
+    border-radius: .6rem;
+    background: var(--em-surface);
+    color: var(--em-ink);
+}

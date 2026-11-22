@@ -20,9 +20,9 @@ $dataset = [
 </head>
 <body class="<?php echo ($view['is_dark'] ? 'dark' : '') ?>">
 
-<main class="container py-3 py-md-4">
-<nav class="mb-3" aria-label="Back navigation"><a href="/">&larr; Back</a></nav>
-<h1 class="h3 mb-3">Year-over-Year Expense</h1>
+<main class="container-fluid py-3">
+<?php renderPageHeader('Year-over-Year Expense', $view['is_dark'], ['cat']) ?>
+<div class="em-dashboard-frame">
 <div class="mb-3" style="max-width: 24rem">
     <label for="category" class="form-label">Category</label>
     <select id="category" class="form-select" name="category" onchange="window.location.href='./?cat=' + encodeURIComponent(this.value)">
@@ -35,6 +35,7 @@ $dataset = [
 
 <div style="height: 400px">
     <canvas id="chart_bars" class="chart" width="100%" height="400"></canvas>
+</div>
 </div>
 </main>
 

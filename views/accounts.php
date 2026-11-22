@@ -12,9 +12,8 @@ if (!isset($view)) { http_response_code(404); return; }
     <link rel="stylesheet" href="../css/ui.css">
 </head>
 <body class="<?php echo $view['is_dark'] ? 'dark' : '' ?>">
-<main class="container py-3 py-md-4">
-<nav class="mb-3" aria-label="Back navigation"><a href="<?php phe($view['back_link']) ?>">&larr; Back</a></nav>
-<h1 class="h3 mb-3">Accounts</h1>
+<main class="container-fluid py-3">
+<?php renderPageHeader('Accounts', $view['is_dark'], back_link: $view['back_link']) ?>
 <div class="table-responsive">
 <table class="table table-sm table-striped align-middle w-auto mw-100 mx-auto accounts">
     <thead>

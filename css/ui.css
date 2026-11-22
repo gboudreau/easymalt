@@ -1,11 +1,7 @@
 /* EasyMalt's compact ledger theme, loaded only by the interactive pages. */
+@import url('header.css');
+
 :root {
-    --em-ink: #263a38;
-    --em-muted: #64746f;
-    --em-line: #d4dfd9;
-    --em-paper: #f4f6f2;
-    --em-surface: #fff;
-    --em-accent: #315b90;
     --em-income: #205b33;
     --em-expense: #862f31;
     --em-income-row: #cfe8d5;
@@ -15,12 +11,6 @@
 }
 
 [data-bs-theme="dark"] {
-    --em-ink: #e6e8eb;
-    --em-muted: #aab1bb;
-    --em-line: #3c4149;
-    --em-paper: #181a1d;
-    --em-surface: #23262b;
-    --em-accent: #a9c1ec;
     --em-income: #94d4ad;
     --em-expense: #ffada0;
     --em-income-row: #21382c;
@@ -93,50 +83,14 @@ button, input, select, textarea, .btn { font-size: 1rem; }
 }
 .em-chart-key span { flex: 0 0 .75em; height: .75em; }
 .em-chart-key[aria-pressed="false"] { text-decoration: line-through; }
-.em-dashboard-frame { max-width: 76rem; margin-inline: auto; }
-.em-dashboard-header {
-    margin-bottom: 1.5rem;
-    padding: clamp(1rem, 3vw, 1.75rem);
-    border: 1px solid var(--em-line);
-    border-top: 3px solid var(--em-accent);
-    border-radius: .6rem;
-    background: var(--em-surface);
-}
-.em-dashboard-masthead, .em-dashboard-actions, .em-dashboard-nav, .em-report-period {
+.em-report-period {
     display: flex;
     align-items: center;
     flex-wrap: wrap;
     gap: .65rem 1rem;
+    padding: .75rem 1rem;
+    border-bottom: 1px solid var(--em-line);
 }
-.em-dashboard-masthead { justify-content: space-between; }
-.em-dashboard-eyebrow {
-    margin: 0 0 .2rem;
-    color: var(--em-muted);
-    font-size: .75rem;
-    font-weight: 700;
-    letter-spacing: .12em;
-    text-transform: uppercase;
-}
-.em-dashboard-header h1 { margin: 0; font: 700 clamp(1.8rem, 4vw, 2.55rem)/1.12 Georgia, serif; }
-.em-dashboard-nav { margin-top: 1rem; padding-top: .75rem; border-top: 1px solid var(--em-line); gap: .25rem 1.25rem; }
-.em-dashboard-nav a { padding-block: .25rem; }
-.em-dashboard-primary {
-    --bs-btn-color: var(--em-surface);
-    --bs-btn-bg: var(--em-accent);
-    --bs-btn-hover-color: var(--em-surface);
-    --bs-btn-hover-bg: var(--em-ink);
-    --bs-btn-active-color: var(--em-surface);
-    --bs-btn-active-bg: var(--em-ink);
-}
-.em-dashboard-secondary {
-    --bs-btn-color: var(--em-ink);
-    --bs-btn-border-color: var(--em-line);
-    --bs-btn-hover-color: var(--em-accent);
-    --bs-btn-hover-bg: var(--em-paper);
-    --bs-btn-hover-border-color: var(--em-accent);
-}
-.em-filter-panel { border: 1px solid var(--em-line); border-radius: .6rem; background: var(--em-surface); }
-.em-report-period { padding: .75rem 1rem; border-bottom: 1px solid var(--em-line); }
 .em-report-period label, .em-search-details summary { font-weight: 700; }
 .em-report-period .form-select { width: auto; }
 .em-search-details summary { padding: .75rem 1rem; cursor: pointer; }

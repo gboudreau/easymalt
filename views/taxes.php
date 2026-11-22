@@ -6,20 +6,20 @@ if (!isset($view)) { http_response_code(404); return; }
 $year = $view['year'];
 $scroll_pos = $view['scroll_pos'];
 ?>
-<html>
+<html data-bs-theme="<?php echo $view['is_dark'] ? 'dark' : 'light' ?>">
 <head>
     <title>EasyMalt - Taxes Report</title>
     <meta name="viewport" content="initial-scale=1.0, user-scalable=yes, width=device-width">
     <link rel="stylesheet" type="text/css" href="../css/styles.css">
+    <link rel="stylesheet" href="../css/header.css">
 </head>
 <body>
 
-&lt; <a href="/">Back</a>
+<?php renderPageHeader('Taxes', $view['is_dark'], ['year', 'scrollPos']) ?>
 
-<h3>Expenses & Income for <?php phe($year) ?></h3>
-
-<div>
-    Listing all transactions that matches any of the following rules:
+<section class="em-dashboard-frame em-filter-panel em-tax-conditions" aria-labelledby="tax-conditions-heading">
+    <h2 id="tax-conditions-heading">Conditions</h2>
+    <p>Listing all transactions that match any of the following rules:</p>
     <ul>
         <?php foreach ($view['taxes_config'] as $tc) : ?>
             <li>
@@ -45,7 +45,9 @@ $scroll_pos = $view['scroll_pos'];
             </li>
         <?php endforeach; ?>
     </ul>
-</div>
+</section>
+
+<h3>Expenses & Income for <?php phe($year) ?></h3>
 
 <table>
     <?php foreach ($view['transactions'] as $txn) : ?>

@@ -67,7 +67,7 @@ $post_process_result = $view['post_process_result'];
                 <input class="form-control" type="date" name="date" id="date" value="<?php phe(substr($txn->date, 0, 10)) ?>" />
                 <?php
                 $time = substr($txn->date, 11);
-                if ($time != '00:00:00' && $time != '12:00:00' && $time != '05:00:00' && $time != '04:00:00') {
+                if ($txn->id != 'new' && $time != '00:00:00' && $time != '12:00:00' && $time != '05:00:00' && $time != '04:00:00') {
                     echo '<div class="form-text">Time: ';
                     phe($time);
                     echo '</div>';

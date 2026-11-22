@@ -21,9 +21,8 @@ if (!isset($view)) {
 </head>
 <body class="<?php echo ($view['is_dark'] ? 'dark' : '') ?>">
 
-<main class="container-fluid py-3 py-md-4">
-<nav class="mb-3" aria-label="Back navigation"><a href="/">&larr; Back</a></nav>
-<h1 class="h3 mb-3">Income vs Expenses</h1>
+<main class="container-fluid py-3">
+<?php renderPageHeader('Income vs Expenses', $view['is_dark'], ['year', 'q']) ?>
 <div class="mb-3" style="max-width: 12rem">
     <label for="year" class="form-label">Year</label>
     <select id="year" class="form-select" name="year" onchange="window.location.href='./?year=' + encodeURIComponent(this.value)">

@@ -12,7 +12,7 @@ foreach ($data as $row) {
 }
 
 renderView('accounts', [
-    'back_link' => $_SESSION['previous_page'],
+    'back_link' => $_SESSION['previous_page'] ?? null,
     'rows' => $data,
     'totals' => $totals,
     'is_dark' => $is_dark,

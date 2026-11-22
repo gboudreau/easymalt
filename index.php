@@ -40,9 +40,6 @@ if (!empty($_POST['do_search'])) {
 
 $view = [
     'is_dark' => $GLOBALS['is_dark'],
-    'theme_url' => './?' . http_build_query(['dark' => $GLOBALS['is_dark'] ? 0 : 1]
-        + array_intersect_key($_GET, array_flip(['q', 'from_date', 'to_date', 'scrollPos']))),
-    'extra_pages' => Config::get('EXTRA_PAGES'),
     'show_cookie_prompt' => !Cookie::get('ECK1C'),
 ];
 

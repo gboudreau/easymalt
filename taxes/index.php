@@ -58,6 +58,7 @@ $q = "SELECT *
 $transactions = DB::getAll($q, $params);
 
 renderView('taxes', [
+    'is_dark' => $is_dark,
     'year' => $year,
     'taxes_config' => $taxes_config,
     'transactions' => $transactions,
