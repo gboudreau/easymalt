@@ -61,7 +61,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
         $q = "INSERT IGNORE INTO transactions
                  SET account_id = :account_id, unique_id = :unique_id, `date` = :date, `type` = :type, amount = :amount, name = :name, memo = :memo";
-        $id = DB::insert(
+        $stmt = DB::execute(
             $q,
             [
                 'account_id' => $txn->account_id,
@@ -73,8 +73,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 'memo' => $txn->memo
             ]
         );
-        if (!empty($id)) {
-            $new_txn_ids[] = $id;
+        if ($stmt->rowCount() === 1) {
+            // LAST_INSERT_ID() is connection-local; do not retry the lookup on a new connection.
+            $new_txn_ids[] = DB::execute("SELECT LAST_INSERT_ID()", retryOnError: FALSE)->fetchColumn();
         }
     }
 
